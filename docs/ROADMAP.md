@@ -7,8 +7,8 @@ The full phase map for the project. Individual phase plans live in `docs/plans/`
 | Phase | Name | Status | Weight/risk |
 |---|---|---|---|
 | 1 | Data landing & verification | ✅ Complete (gate passed) | Light, but foundation-critical |
-| 2 | dbt staging & marts + tests | ▶ Next | Medium (mechanical) |
-| 3 | Cube semantic layer | Pending | **Heavy — core of project** |
+| 2 | dbt staging & marts + tests | ✅ Complete (gate passed 2026-07-13) | Medium (mechanical) |
+| 3 | Cube semantic layer | ▶ In progress | **Heavy — core of project** |
 | 4 | Natural-language interface | Pending | Medium-heavy |
 | 5 | Evaluation harness | Pending | **Heavy — the differentiator** |
 | 6 | Streamlit front end | Pending | Light-medium |
@@ -26,6 +26,8 @@ The phases are not equal. Phases 3 and 5 carry most of the intellectual work and
 - **Geothermal:** counts in the renewable and carbon-free numerators when present, and in the denominator. CISO-only, first data 2025-12-16, so negligible in the core window. This amends the PRD §6.2 renewable definition per the Phase 1 gate decision.
 - **Generation basis:** `net_generation_adjusted_mwh` (EIA's cleaned series), never raw reported. Evidence from the landed data: adjusted never drops a reported value, fills 168–1,552 gaps per BA, differs from reported in only 0–476 rows per BA. No PUDL-imputed series exists for generation. Carry `is_imputed_eia` (EIA-imputed hours) so imputation status stays surfaced (integrity rule 3), and keep `net_generation_reported_mwh` for transparency. (Locked at Phase 2 plan approval, 2026-07-09.)
 - **Metric definitions (from `PRD.md`):** growth = total-annual YoY + window CAGR; renewable = wind/solar/hydro, plus geothermal when present (Phase 1 gate amendment; negligible in-window); carbon-free = renewable + nuclear (separate metric); fossil = coal/gas/petroleum. Weather-normalization is out of scope for v1, named as future work.
+- **Carbon-intensity proxy: deferred to future work.** PRD §11 open decision 5 resolved at Phase 3 planning (2026-07-13). Not built in v1; named in the README limitations/future-work section. Can be added later as one more governed metric with cited emission factors.
+- **Cube runtime: Docker, pinned image.** `cubejs/cube` at a pinned stable tag via docker-compose in `semantic/`. Chosen over Node/npx for reproducibility from a clean checkout. (Locked at Phase 3 planning, 2026-07-13.)
 
 ## Outstanding verification task (carry into Phase 2)
 - **Second plausibility anchor: DONE** — recorded in `docs/verification_anchors.md`. CISO 2023 peak demand: mart 44,007 MWh hourly vs CAISO-published 44,534 MW instantaneous (-1.18%, documented hourly-vs-instantaneous definitional difference; peak-demand form substituted because CAISO publishes no annual energy total). ERCOT annual anchor restated there; PJM ~800,000 GWh forecast baseline noted as weak corroboration.
