@@ -24,6 +24,16 @@ def show(con, title, sql):
     print(con.sql(sql))
 
 
+def dump(con, title, sql):
+    """Print full result as CSV lines (show() truncates long tables)."""
+    print(f"\n--- {title} ---")
+    rows = con.execute(sql).fetchall()
+    cols = [d[0] for d in con.execute(sql).description]
+    print(",".join(cols))
+    for r in rows:
+        print(",".join(str(x) for x in r))
+
+
 def main():
     con = duckdb.connect(str(DB_PATH), read_only=True)
     # dlt landed datetime_utc as TIMESTAMPTZ; pin the session to UTC so
@@ -204,6 +214,136 @@ def main():
                sum(CASE WHEN demand_imputed_pudl_mwh < 0 THEN 1 ELSE 0 END) AS negative_hours,
                sum(CASE WHEN demand_imputed_pudl_mwh IS NULL THEN 1 ELSE 0 END) AS null_hours
         FROM {OUT_OPS} GROUP BY 1 ORDER BY 1""")
+
+    print("\n" + "=" * 70)
+    print("SECTION 8: 2024-07-01 series-break discontinuity quantification")
+    print("=" * 70)
+    # Legacy fuel labels end and replacement labels begin at 2024-07-01.
+    # Unifying each pair into one series is only legitimate if the two labels
+    # measure close to the same physical quantity. Three checks per family:
+    # (a) overlap hours (both labels non-null at once), (b) a seam comparison
+    # of mean daily generation in adjacent 28-day windows, (c) each
+    # cross-regime monthly YoY ratio vs the range of same-calendar-month YoY
+    # ratios observed entirely within the legacy regime (2020-01..2024-06,
+    # i.e. the approved 2019+ window).
+    families = {
+        "hydro": ("hydro", "hydro_excluding_pumped_storage"),
+        "solar": ("solar", "solar_wo_integrated_battery_storage"),
+        "wind": ("wind", "wind_wo_integrated_battery_storage"),
+    }
+
+    for fam, (old, new) in families.items():
+        show(con, f"{fam}: hours where BOTH labels are non-null (double-count risk)", f"""
+            SELECT o.balancing_authority_code_eia AS ba, count(*) AS overlap_hours
+            FROM {GEN} o JOIN {GEN} n
+              ON o.balancing_authority_code_eia = n.balancing_authority_code_eia
+             AND o.datetime_utc = n.datetime_utc
+            WHERE o.generation_energy_source = '{old}'
+              AND n.generation_energy_source = '{new}'
+              AND o.net_generation_reported_mwh IS NOT NULL
+              AND n.net_generation_reported_mwh IS NOT NULL
+            GROUP BY 1 ORDER BY 1""")
+
+    for fam, (old, new) in families.items():
+        show(con, f"{fam}: seam comparison, mean daily MWh "
+                  f"(legacy 2024-06-02..06-29 vs new 2024-07-02..07-29)", f"""
+            WITH daily AS (
+                SELECT balancing_authority_code_eia AS ba,
+                       date_trunc('day', datetime_utc) AS d,
+                       sum(CASE WHEN generation_energy_source = '{old}'
+                                THEN net_generation_reported_mwh END) AS old_mwh,
+                       sum(CASE WHEN generation_energy_source = '{new}'
+                                THEN net_generation_reported_mwh END) AS new_mwh
+                FROM {GEN} GROUP BY 1, 2)
+            SELECT ba,
+                   round(avg(old_mwh) FILTER (WHERE d BETWEEN DATE '2024-06-02' AND DATE '2024-06-29')) AS legacy_daily_mwh,
+                   round(avg(new_mwh) FILTER (WHERE d BETWEEN DATE '2024-07-02' AND DATE '2024-07-29')) AS new_daily_mwh,
+                   round(100.0 * (new_daily_mwh - legacy_daily_mwh) / legacy_daily_mwh, 1) AS step_pct,
+                   round((new_daily_mwh - legacy_daily_mwh) * 365) AS annualized_gap_mwh
+            FROM daily GROUP BY ba ORDER BY ba""")
+
+    for fam, (old, new) in families.items():
+        dump(con, f"{fam}: cross-regime monthly YoY ratio vs legacy-regime "
+                  f"same-month YoY range (2020-01..2024-06 baseline)", f"""
+            WITH monthly AS (
+                SELECT balancing_authority_code_eia AS ba,
+                       date_trunc('month', datetime_utc) AS m,
+                       sum(CASE WHEN generation_energy_source IN ('{old}', '{new}')
+                                THEN net_generation_reported_mwh END) AS mwh
+                FROM {GEN} GROUP BY 1, 2),
+            yoy AS (
+                SELECT a.ba, a.m, a.mwh / b.mwh AS ratio
+                FROM monthly a
+                JOIN monthly b ON a.ba = b.ba AND b.m = a.m - INTERVAL 1 YEAR
+                WHERE a.mwh IS NOT NULL AND b.mwh > 0),
+            baseline AS (
+                SELECT ba, month(m) AS cal_month,
+                       min(ratio) AS hist_min, median(ratio) AS hist_med,
+                       max(ratio) AS hist_max, count(*) AS n_years
+                FROM yoy
+                WHERE m BETWEEN TIMESTAMPTZ '2020-01-01' AND TIMESTAMPTZ '2024-06-01'
+                GROUP BY 1, 2),
+            cross_regime AS (
+                SELECT ba, m, month(m) AS cal_month, ratio FROM yoy
+                WHERE m BETWEEN TIMESTAMPTZ '2024-07-01' AND TIMESTAMPTZ '2025-06-01')
+            SELECT c.ba, strftime(c.m, '%Y-%m') AS month,
+                   round(c.ratio, 3) AS cross_ratio,
+                   round(b.hist_min, 3) AS hist_min,
+                   round(b.hist_med, 3) AS hist_med,
+                   round(b.hist_max, 3) AS hist_max,
+                   c.ratio BETWEEN b.hist_min AND b.hist_max AS inside_range
+            FROM cross_regime c JOIN baseline b USING (ba, cal_month)
+            ORDER BY c.ba, c.m""")
+
+    show(con, "materiality: family share of gross non-storage generation, 2019-2025", f"""
+        WITH g AS (
+            SELECT balancing_authority_code_eia AS ba,
+                   CASE WHEN generation_energy_source IN ('hydro', 'hydro_excluding_pumped_storage') THEN 'hydro'
+                        WHEN generation_energy_source IN ('solar', 'solar_wo_integrated_battery_storage') THEN 'solar'
+                        WHEN generation_energy_source IN ('wind', 'wind_wo_integrated_battery_storage') THEN 'wind'
+                        ELSE 'all_other_non_storage' END AS fam,
+                   sum(net_generation_reported_mwh) AS mwh
+            FROM {GEN}
+            WHERE datetime_utc >= TIMESTAMPTZ '2019-01-01'
+              AND datetime_utc < TIMESTAMPTZ '2026-01-01'
+              AND generation_energy_source NOT IN (
+                  'battery_storage', 'pumped_storage', 'other_energy_storage',
+                  'unknown_energy_storage')
+            GROUP BY 1, 2)
+        SELECT ba, fam, round(mwh) AS mwh,
+               round(100.0 * mwh / sum(mwh) OVER (PARTITION BY ba), 2) AS share_pct
+        FROM g ORDER BY ba, fam""")
+
+    show(con, "summary: cross-regime months inside legacy YoY range, per BA x family", f"""
+        WITH monthly AS (
+            SELECT balancing_authority_code_eia AS ba,
+                   CASE WHEN generation_energy_source IN ('hydro', 'hydro_excluding_pumped_storage') THEN 'hydro'
+                        WHEN generation_energy_source IN ('solar', 'solar_wo_integrated_battery_storage') THEN 'solar'
+                        WHEN generation_energy_source IN ('wind', 'wind_wo_integrated_battery_storage') THEN 'wind'
+                   END AS fam,
+                   date_trunc('month', datetime_utc) AS m,
+                   sum(net_generation_reported_mwh) AS mwh
+            FROM {GEN} WHERE generation_energy_source IN (
+                'hydro', 'hydro_excluding_pumped_storage',
+                'solar', 'solar_wo_integrated_battery_storage',
+                'wind', 'wind_wo_integrated_battery_storage')
+            GROUP BY 1, 2, 3),
+        yoy AS (
+            SELECT a.ba, a.fam, a.m, a.mwh / b.mwh AS ratio
+            FROM monthly a
+            JOIN monthly b ON a.ba = b.ba AND a.fam = b.fam AND b.m = a.m - INTERVAL 1 YEAR
+            WHERE a.mwh IS NOT NULL AND b.mwh > 0),
+        baseline AS (
+            SELECT ba, fam, month(m) AS cal_month, min(ratio) AS lo, max(ratio) AS hi
+            FROM yoy WHERE m BETWEEN TIMESTAMPTZ '2020-01-01' AND TIMESTAMPTZ '2024-06-01'
+            GROUP BY 1, 2, 3)
+        SELECT c.ba, c.fam,
+               count(*) AS cross_months,
+               sum(CASE WHEN c.ratio BETWEEN b.lo AND b.hi THEN 1 ELSE 0 END) AS inside_range
+        FROM yoy c JOIN baseline b
+          ON c.ba = b.ba AND c.fam = b.fam AND month(c.m) = b.cal_month
+        WHERE c.m BETWEEN TIMESTAMPTZ '2024-07-01' AND TIMESTAMPTZ '2025-06-01'
+        GROUP BY 1, 2 ORDER BY 1, 2""")
 
 
 if __name__ == "__main__":

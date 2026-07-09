@@ -210,7 +210,9 @@ ERCO 2023 = **446.79**, ERCO 2024 = 463.60, CISO 2023 = 218.19, PJM 2023 = 784.8
 PJM 2025 = 843.06. (ERCOT's publicly reported 2023 energy use is ~445–446 TWh;
 same ballpark — this is a plausibility anchor, not a validation.)
 
-## 8. Open questions for reviewer (blocking Phase 2)
+## 8. Open questions for reviewer — RESOLVED, see §9
+
+Kept for the record; all six were decided by the reviewer on 2026-07-09.
 
 1. **Final BA set:** PJM, ERCO, CISO landed and healthy. Confirm three BAs, or add a
    contrast region (re-run of `make land` required).
@@ -237,3 +239,98 @@ same ballpark — this is a plausibility anchor, not a validation.)
    metric basis.
 
 Phase 2 (dbt models) does not begin until these are confirmed.
+
+## 9. Confirmed decisions (reviewer, 2026-07-09)
+
+These govern all downstream modeling.
+
+1. **Start year: 2019.** First full calendar year with fuel-mix data. Demand-only
+   history before 2019 is landed but not used for metrics.
+2. **Demand basis: `demand_imputed_pudl_mwh`.** Complete and outlier-fixed, with the
+   imputation-code column surfaced wherever imputation status matters.
+   `demand_reported_mwh` is retained for transparency and is never a metric basis.
+3. **Fuel mapping: validity-windowed mapping table**, unifying each legacy/new label
+   pair into one continuous series — approved conditional on the break
+   quantification in §10. The unified series carries a **`fuel_series_break` flag at
+   2024-07-01**, and every metric whose window spans that date is documented as
+   affected.
+4. **BA set final: PJM, ERCO, CISO.** No fourth region; depth over breadth.
+5. **ERCOT fossil share = coal + gas.** Petroleum is **absent from ERCOT's EIA-930
+   reporting** — stated explicitly wherever the metric is shown; it is not zero by
+   assumption.
+6. **Mix-metric denominator = gross generation excluding storage
+   charging/discharging.** All storage categories (`battery_storage`,
+   `pumped_storage`, `*_energy_storage`) are excluded from the denominator and from
+   every named bucket. `other` stays in the denominator but belongs to no named
+   bucket. Geothermal (CISO-only, first data 2025-12-16, so negligible in-window)
+   counts as renewable when present. This choice is documented in the metric catalog.
+
+## 10. Quantification of the 2024-07-01 series break
+
+Method (SECTION 8 of `scripts/profile_phase1.py`; reported values, UTC): for each
+label pair — (a) count hours where both labels are non-null; (b) compare mean daily
+generation in the last 28 full legacy days (2024-06-02..06-29) vs the first 28 full
+new-label days (2024-07-02..07-29); (c) compare each cross-regime monthly YoY ratio
+(2024-07 through 2025-06 vs the same month a year earlier) against the min–max range
+of same-calendar-month YoY ratios computed entirely inside the legacy regime
+(2020-01..2024-06). Baseline caveat: only 4 year-pairs per calendar month, so the
+historical ranges are wide and the test is coarse.
+
+**(a) Overlap: zero hours** for every family and BA — the labels never coexist, so
+the unified series cannot double count.
+
+**(b) Seam comparison** (mean daily MWh, % step, step annualized):
+
+| BA | Family | Legacy daily | New daily | Step | Annualized gap (MWh) |
+|---|---|---|---|---|---|
+| CISO | hydro | 74,435 | 77,682 | +4.4% | +1,185,155 |
+| ERCO | hydro | 3,078 | 1,090 | **-64.6%** | -725,620 |
+| PJM | hydro | 45,330 | 45,003 | -0.7% | -119,355 |
+| CISO | solar | 172,263 | 161,329 | -6.3% | -3,990,910 |
+| ERCO | solar | 165,299 | 163,487 | -1.1% | -661,380 |
+| PJM | solar | 65,842 | 59,208 | -10.1% | -2,421,410 |
+| CISO | wind | 79,055 | 56,751 | -28.2% | -8,140,960 |
+| ERCO | wind | 335,763 | 239,570 | -28.6% | -35,110,445 |
+| PJM | wind | 73,333 | 36,810 | -49.8% | -13,330,895 |
+
+The seam windows straddle the June→July seasonal transition, so raw steps overstate
+any definitional shift for seasonal sources (wind falls sharply into July every
+year). The YoY check controls for this.
+
+**(c) Cross-regime YoY ratios inside the legacy-regime range** (of 12 months):
+
+| BA | hydro | solar | wind |
+|---|---|---|---|
+| CISO | 4 | 8 | 9 |
+| ERCO | 8 | 11 | 9 |
+| PJM | 8 | 9 | 9 |
+
+**Conclusions per family** (materiality = share of gross non-storage generation
+2019–2025, from the profile script):
+
+- **Wind (CISO 10.4%, ERCO 23.5%, PJM 3.4% of generation): no evidence of a level
+  break.** Out-of-range months are scattered on both sides; the large seam steps
+  match the normal seasonal decline. The `_w_integrated_battery_storage` labels are
+  empty for these BAs, so no wind was rerouted to an unlanded label.
+- **Solar (CISO 21.7%, ERCO 6.7%, PJM 1.2%): no evidence of a downward level
+  break.** Out-of-range months are almost all on the *high* side (e.g. PJM 2024-07
+  ratio 1.739 vs historical max 1.626), consistent with accelerating solar growth,
+  not with generation lost to a relabel.
+- **Hydro PJM (1.9%): no measurable step.** Seam -0.7%; annual sums continuous
+  across the break (15.45 TWh legacy 2023 vs 15.47 TWh new 2025).
+- **Hydro ERCO (0.12%): a real relative level shift (-64.6% at the seam) that is
+  immaterial** — ERCOT hydro is ~0.1% of its generation; the annualized gap
+  (~0.73 TWh) is invisible at mix-metric precision.
+- **Hydro CISO (10.5%): material and genuinely ambiguous.** No downward step at the
+  seam (+4.4%), but all 12 cross-regime YoY ratios are below 1.0 and 8 of 12 fall
+  below the historical range. This cannot be attributed from this data alone: 2023
+  was an exceptionally wet California hydro year, so declining YoY ratios in
+  2024–2025 are hydrologically expected, and the 4-sample baseline ranges are
+  extremely wide (e.g. 0.124–3.148 for August). Definitional narrowing cannot be
+  ruled out. **This is the caveat the `fuel_series_break` flag exists to carry.**
+
+**Standing consequences (per decision §9.3):** the unified hydro/solar/wind series
+are built from the validity-windowed mapping; each carries `fuel_series_break =
+2024-07-01`; the metric catalog marks every metric whose evaluation window spans
+that date, with the CISO-hydro ambiguity named explicitly in the hydro and
+renewable-share metric documentation.
