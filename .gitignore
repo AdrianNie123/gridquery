@@ -1,0 +1,10 @@
+# Data artifacts: rebuilt via `make land`, never committed
+data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# dlt runtime state
+.dlt/secrets.toml
