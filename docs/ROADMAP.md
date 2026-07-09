@@ -22,8 +22,10 @@ The phases are not equal. Phases 3 and 5 carry most of the intellectual work and
 - **Demand basis:** PUDL-imputed demand series, never raw reported. Raw contains sentinel garbage (PJM Oct 2021 ~2.1B MWh). Carry the imputation-code column through so imputed hours are surfaced (integrity rule 3).
 - **Fuel series break (2024-07-01):** EIA-930 recategorized fuels mid-2024 (legacy `hydro`/`solar`/`wind` → `hydro_excluding_pumped_storage`, `solar_wo_integrated_battery_storage`, etc.). Approved approach: validity-windowed mapping table unifying each pair into one series, **conditional on first quantifying the discontinuity at the boundary.** If pre/post values are not level-continuous, define the unified series AND carry a break flag; document that any metric spanning 2024-07-01 is affected. Do not paper over a real jump as continuity.
 - **ERCOT fossil share:** coal + natural gas. Petroleum is **absent from ERCOT reporting**, not zero — document the absence explicitly per BA; do not silently drop it.
-- **Storage / geothermal / other:** excluded from renewable and fossil numerators; handled deliberately in the denominator. Define mix denominator as gross generation excluding storage charge/discharge, and document the choice. Geothermal (CISO-only, from Dec 2025) is essentially outside the core window; treat as renewable when present, note negligible in-window.
-- **Metric definitions (from `PRD.md`):** growth = total-annual YoY + window CAGR; renewable = wind/solar/hydro; carbon-free = renewable + nuclear (separate metric); fossil = coal/gas/petroleum. Weather-normalization is out of scope for v1, named as future work.
+- **Mix denominator:** gross generation excluding storage charge/discharge. All storage categories (`battery_storage`, `pumped_storage`, `*_energy_storage`) are excluded from the denominator and from every named bucket. `other` and `unknown` stay in the denominator but belong to no named bucket.
+- **Geothermal:** counts in the renewable and carbon-free numerators when present, and in the denominator. CISO-only, first data 2025-12-16, so negligible in the core window. This amends the PRD §6.2 renewable definition per the Phase 1 gate decision.
+- **Generation basis:** `net_generation_adjusted_mwh` (EIA's cleaned series), never raw reported. Evidence from the landed data: adjusted never drops a reported value, fills 168–1,552 gaps per BA, differs from reported in only 0–476 rows per BA. No PUDL-imputed series exists for generation. Carry `is_imputed_eia` (EIA-imputed hours) so imputation status stays surfaced (integrity rule 3), and keep `net_generation_reported_mwh` for transparency. (Locked at Phase 2 plan approval, 2026-07-09.)
+- **Metric definitions (from `PRD.md`):** growth = total-annual YoY + window CAGR; renewable = wind/solar/hydro, plus geothermal when present (Phase 1 gate amendment; negligible in-window); carbon-free = renewable + nuclear (separate metric); fossil = coal/gas/petroleum. Weather-normalization is out of scope for v1, named as future work.
 
 ## Outstanding verification task (carry into Phase 2)
 - **Second plausibility anchor:** Phase 1 confirmed 2023 ERCOT demand ≈ 446.79 TWh vs. public ~445–446 TWh. Before trusting the marts, reproduce one more anchor (CISO or PJM, one year, summed demand vs. that operator's publicly reported annual total). Two independent anchors = solid foundation.
@@ -45,6 +47,8 @@ The phases are not equal. Phases 3 and 5 carry most of the intellectual work and
 - Accepted-values test on fuel categories after the break mapping, so an unmapped/surprise category fails loudly.
 - Relationship/consistency tests where marts join.
 - A test or documented check that the fuel series-break flag is set correctly around 2024-07-01.
+
+Accepted-range bounds are derived from the landed data envelope and documented with their basis (PUDL release, observed min/max, date). Policy: a failing range test is a stop-and-investigate event first, never a prompt to widen bounds. Bounds change only when a new landing changes the envelope, and the change must cite the re-run profile output (`make profile`) in the commit that adjusts them.
 
 **Delegation (Phase 2 has real bounded parallel work):**
 - Good subagent task: **writing the dbt test suite** once the model structure is agreed — bounded, verifiable, doesn't need whole-architecture context.
