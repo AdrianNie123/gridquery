@@ -26,6 +26,9 @@ def show(con, title, sql):
 
 def main():
     con = duckdb.connect(str(DB_PATH), read_only=True)
+    # dlt landed datetime_utc as TIMESTAMPTZ; pin the session to UTC so
+    # year() groupings and printed timestamps are UTC, not machine-local.
+    con.execute("SET TimeZone='UTC'")
 
     print("=" * 70)
     print("SECTION 0: landed tables and row counts")
@@ -102,6 +105,15 @@ def main():
         WHERE generation_energy_source LIKE 'wind%'
         GROUP BY 1, 2 ORDER BY 1, 2""")
 
+    # The yearly tables above show legacy categories ending in 2024 and new
+    # ones starting there. Pin down the exact switch boundary per category.
+    show(con, "non-null reported date range per category (regime boundaries)", f"""
+        SELECT generation_energy_source,
+               min(datetime_utc) FILTER (WHERE net_generation_reported_mwh IS NOT NULL) AS first_nonnull,
+               max(datetime_utc) FILTER (WHERE net_generation_reported_mwh IS NOT NULL) AS last_nonnull,
+               count(*) FILTER (WHERE net_generation_reported_mwh IS NOT NULL) AS nonnull_rows
+        FROM {GEN} GROUP BY 1 ORDER BY 1""")
+
     print("\n" + "=" * 70)
     print("SECTION 4: imputation signal")
     print("=" * 70)
@@ -175,6 +187,16 @@ def main():
                sum(CASE WHEN demand_reported_mwh < 0 THEN 1 ELSE 0 END) AS negative_hours,
                sum(CASE WHEN demand_reported_mwh = 0 THEN 1 ELSE 0 END) AS zero_hours
         FROM {OPS} GROUP BY 1 ORDER BY 1""")
+    # PJM showed max reported demand near INT32_MAX: locate sentinel garbage
+    # values and confirm the adjusted / PUDL-imputed series are sane there.
+    show(con, "hours with reported demand > 500000 MWh (sentinel outliers)", f"""
+        SELECT c.balancing_authority_code_eia AS ba, c.datetime_utc,
+               c.demand_reported_mwh, c.demand_adjusted_mwh,
+               o.demand_imputed_pudl_mwh, o.demand_imputed_pudl_mwh_imputation_code AS code
+        FROM {OPS} c
+        JOIN {OUT_OPS} o USING (balancing_authority_code_eia, datetime_utc)
+        WHERE c.demand_reported_mwh > 500000
+        ORDER BY 1, 2""")
     show(con, "demand_imputed_pudl_mwh stats per BA (out ops)", f"""
         SELECT balancing_authority_code_eia AS ba,
                round(min(demand_imputed_pudl_mwh)) AS min_mwh,
