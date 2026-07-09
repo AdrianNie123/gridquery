@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "Governed semantic layer with an evaluated NL interface over U.S. grid demand data (EIA-930 via PUDL)"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "dbt-core>=1.9",
+    "dbt-duckdb>=1.9",
     "dlt[duckdb]>=1.6",
     "duckdb>=1.1",
     "pyarrow>=18",

@@ -1,0 +1,9 @@
+# Checked in deliberately: local DuckDB, no secrets.
+# Path is relative to the invocation directory: run dbt via `make` from repo root.
+gridquery:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "data/gridquery.duckdb"
+      threads: 4

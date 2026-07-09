@@ -8,3 +8,7 @@ __pycache__/
 
 # dlt runtime state
 .dlt/secrets.toml
+transform/target/
+transform/dbt_packages/
+transform/logs/
+logs/

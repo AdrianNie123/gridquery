@@ -1,6 +1,17 @@
-# GridQuery task runner. Phase 1 targets only; later phases add dbt/cube/eval.
+# GridQuery task runner.
 
-.PHONY: land profile
+.PHONY: land profile build dbt-test
+
+DBT_FLAGS := --project-dir transform --profiles-dir transform
+
+# Run + test all dbt models on top of the landed DuckDB.
+build:
+	uv run dbt deps $(DBT_FLAGS)
+	uv run dbt build $(DBT_FLAGS)
+
+# Run dbt tests only.
+dbt-test:
+	uv run dbt test $(DBT_FLAGS)
 
 # Land the EIA-930 subset from PUDL into data/gridquery.duckdb (full replace).
 land:
