@@ -1,0 +1,20 @@
+source_label,unified_fuel_category,source_regime,is_storage,in_mix_denominator,is_renewable,is_fossil,is_carbon_free,notes
+coal,coal,both,false,true,false,true,false,
+gas,gas,both,false,true,false,true,false,natural gas
+oil,oil,both,false,true,false,true,false,"petroleum; absent from ERCO reporting (absence of data, not zero)"
+nuclear,nuclear,both,false,true,false,false,true,
+other,other,both,false,true,false,false,false,no named bucket; stays in mix denominator
+unknown,unknown,both,false,true,false,false,false,no data for landed BAs as of PUDL v2026.6.1; no named bucket
+geothermal,geothermal,post_2024_break,false,true,true,false,true,CISO only; first data 2025-12-16; renewable per Phase 1 gate amendment
+hydro,hydro,legacy,false,true,true,false,true,legacy label; ends 2024-07-01
+hydro_excluding_pumped_storage,hydro,post_2024_break,false,true,true,false,true,replaces hydro from 2024-07-01; see phase1_data_profile.md s10 (CISO caveat)
+solar,solar,legacy,false,true,true,false,true,legacy label; ends 2024-07-01
+solar_wo_integrated_battery_storage,solar,post_2024_break,false,true,true,false,true,replaces solar from 2024-07-01
+solar_w_integrated_battery_storage,solar,post_2024_break,false,true,true,false,true,no data for landed BAs as of PUDL v2026.6.1; mapped for future releases
+wind,wind,legacy,false,true,true,false,true,legacy label; ends 2024-07-01
+wind_wo_integrated_battery_storage,wind,post_2024_break,false,true,true,false,true,replaces wind from 2024-07-01
+wind_w_integrated_battery_storage,wind,post_2024_break,false,true,true,false,true,no data for landed BAs as of PUDL v2026.6.1; mapped for future releases
+battery_storage,battery_storage,post_2024_break,true,false,false,false,false,ERCO only; first data 2024-10-23; excluded from mix denominator
+pumped_storage,pumped_storage,post_2024_break,true,false,false,false,false,no data for landed BAs as of PUDL v2026.6.1; excluded from mix denominator
+other_energy_storage,other_energy_storage,post_2024_break,true,false,false,false,false,no data for landed BAs as of PUDL v2026.6.1; excluded from mix denominator
+unknown_energy_storage,unknown_energy_storage,post_2024_break,true,false,false,false,false,ERCO only 2024-10-23 to 2025-12-15; net negative (charging); excluded from mix denominator

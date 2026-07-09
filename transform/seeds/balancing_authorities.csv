@@ -1,0 +1,4 @@
+ba_code,ba_name,iana_timezone,notes
+PJM,PJM Interconnection,America/New_York,
+ERCO,Electric Reliability Council of Texas (ERCOT),America/Chicago,petroleum (oil) is absent from ERCOT EIA-930 reporting: absence of data not zero
+CISO,California Independent System Operator (CAISO),America/Los_Angeles,geothermal reported separately from 2025-12-16

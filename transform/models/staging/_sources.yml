@@ -1,0 +1,19 @@
+version: 2
+
+sources:
+  - name: landing
+    description: >
+      EIA-930 subset landed from PUDL stable release v2026.6.1 by
+      ingest/eia930_pipeline.py (make land). Filtered at load to
+      PJM / ERCO / CISO, full available history.
+    schema: landing
+    tables:
+      - name: out_eia930__hourly_operations
+        description: >
+          Hourly BA operations. Carries reported, EIA-adjusted, EIA-imputed
+          and PUDL-imputed demand series plus the PUDL imputation-code column.
+      - name: core_eia930__hourly_net_generation_by_energy_source
+        description: >
+          Hourly net generation by EIA-930 fuel label. Carries reported,
+          EIA-adjusted and EIA-imputed series. No PUDL-imputed series exists
+          for generation.
