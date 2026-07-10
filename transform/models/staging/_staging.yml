@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: stg_eia930__hourly_demand
+    description: >
+      Hourly demand per balancing authority, staged one-to-one from
+      landing.out_eia930__hourly_operations. Encodes two locked decisions
+      (docs/ROADMAP.md): the demand basis is the PUDL-imputed series, never
+      raw reported (raw contains sentinel garbage, e.g. PJM 2021-10-19 with
+      values near 2.1 billion MWh), and the BA set is PJM/ERCO/CISO.
+      datetime_utc is normalized from TIMESTAMPTZ to a naive UTC timestamp so
+      downstream aggregation is immune to session timezone.
+    columns:
+      - name: ba_code
+        description: EIA balancing authority code. One of PJM, ERCO, CISO (locked set).
+        data_tests:
+          - not_null
+      - name: datetime_utc
+        description: Hour start, naive UTC timestamp. Hourly grain, continuous spine per BA.
+        data_tests:
+          - not_null
+      - name: demand_mwh
+        description: >
+          Demand in MWh for the hour, PUDL-imputed series (locked demand
+          basis). Complete: no nulls, outliers replaced, replacement reasons
+          in imputation_code.
+      - name: demand_reported_mwh
+        description: >
+          As-reported demand, kept for transparency only. Contains gaps and
+          sentinel garbage; never a metric basis (locked decision).
+      - name: imputation_code
+        description: >
+          PUDL imputation reason (e.g. missing_value, global_outlier). Null
+          means the hour was not imputed. Carried so imputed hours stay
+          identifiable (integrity rule 3).
+      - name: is_imputed
+        description: True where imputation_code is not null.
+
+  - name: stg_eia930__hourly_generation
+    description: >
+      Hourly net generation per balancing authority and EIA-930 fuel label,
+      staged one-to-one from
+      landing.core_eia930__hourly_net_generation_by_energy_source. Encodes
+      the locked generation basis (docs/ROADMAP.md): the EIA-adjusted series,
+      which never drops a reported value and fills 168 to 1,552 gaps per BA.
+      Same BA-set filter and naive-UTC normalization as demand staging.
+    columns:
+      - name: ba_code
+        description: EIA balancing authority code. One of PJM, ERCO, CISO (locked set).
+      - name: datetime_utc
+        description: Hour start, naive UTC timestamp.
+      - name: source_label
+        description: >
+          Raw EIA-930 fuel label as delivered by PUDL. 19 labels observed in
+          PUDL v2026.6.1; the accepted_values test makes any new label fail
+          loudly here before it can reach the marts unmapped.
+        data_tests:
+          # The 19 source labels governed by seeds/fuel_category_mapping.csv.
+          # A new PUDL label must fail loudly here at staging.
+          - accepted_values:
+              arguments:
+                values:
+                  - coal
+                  - gas
+                  - oil
+                  - nuclear
+                  - other
+                  - unknown
+                  - geothermal
+                  - hydro
+                  - hydro_excluding_pumped_storage
+                  - solar
+                  - solar_wo_integrated_battery_storage
+                  - solar_w_integrated_battery_storage
+                  - wind
+                  - wind_wo_integrated_battery_storage
+                  - wind_w_integrated_battery_storage
+                  - battery_storage
+                  - pumped_storage
+                  - other_energy_storage
+                  - unknown_energy_storage
+      - name: net_generation_mwh
+        description: >
+          Net generation in MWh, EIA-adjusted series (locked generation
+          basis). Null where the label does not apply to the BA-hour (labels
+          outside their reporting regime, or absent per BA such as oil for
+          ERCO).
+      - name: net_generation_reported_mwh
+        description: As-reported net generation, kept for transparency only.
+      - name: is_imputed_eia
+        description: >
+          True where EIA imputed this value (net_generation_imputed_eia_mwh
+          non-null in the source). Surfaces imputation status (integrity
+          rule 3); there is no PUDL-imputed series for generation.

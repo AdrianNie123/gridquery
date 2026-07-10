@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: int_generation__fuel_mapped
+    description: >
+      The fuel series-break and mix-denominator decisions, encoded once
+      (docs/ROADMAP.md). Joins staged generation to the governed seed
+      fuel_category_mapping: EIA-930 recategorized fuels on 2024-07-01
+      (legacy hydro/solar/wind labels end, replacement labels begin), and
+      this model unifies each pair into one unified_fuel_category while
+      carrying source_regime as the break signal on every row. The
+      discontinuity was quantified before unification
+      (docs/phase1_data_profile.md section 10): no detectable level break
+      for wind, solar, or PJM hydro; immaterial for ERCO hydro (0.12
+      percent of its generation); ambiguous for CISO hydro (10.5 percent,
+      hydrology vs definitional narrowing) - any metric spanning
+      2024-07-01 is affected and must say so. Left join by design: an
+      unmapped source label produces a null unified_fuel_category that
+      downstream not_null tests turn into a loud failure.
+    columns:
+      - name: ba_code
+        description: EIA balancing authority code (PJM, ERCO, CISO).
+      - name: datetime_utc
+        description: Hour start, naive UTC timestamp.
+      - name: unified_fuel_category
+        description: >
+          Governed fuel category unifying legacy and post-break labels
+          (e.g. hydro and hydro_excluding_pumped_storage both map to
+          hydro). Null only if a source label is missing from the seed.
+      - name: source_regime
+        description: >
+          Series-break signal, derived from the source label itself:
+          legacy (label ended 2024-07-01), post_2024_break (label began
+          2024-07-01), or both (label continuous across the break).
+      - name: source_label
+        description: Raw EIA-930 label the row came from.
+      - name: net_generation_mwh
+        description: Net generation in MWh, EIA-adjusted series (locked basis).
+      - name: net_generation_reported_mwh
+        description: As-reported value, transparency only.
+      - name: is_imputed_eia
+        description: True where EIA imputed this value.
+      - name: is_storage
+        description: True for storage categories (battery, pumped, other/unknown storage).
+      - name: in_mix_denominator
+        description: >
+          Locked denominator decision: mix-metric denominator is gross
+          generation excluding storage charge/discharge. False exactly for
+          storage categories; other and unknown stay true but belong to no
+          named bucket.
+      - name: is_renewable
+        description: >
+          Locked classification: wind, solar, hydro, plus geothermal when
+          present (Phase 1 gate amendment).
+      - name: is_fossil
+        description: "Locked classification: coal, gas, oil."
+      - name: is_carbon_free
+        description: "Locked classification: renewable plus nuclear."

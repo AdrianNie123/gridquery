@@ -1,0 +1,60 @@
+version: 2
+
+seeds:
+  - name: fuel_category_mapping
+    description: >
+      The governed fuel mapping: one row per raw EIA-930 source label (19
+      observed in PUDL v2026.6.1), unifying the labels across the 2024-07-01
+      recategorization into continuous unified categories, with the locked
+      classification and denominator flags (docs/ROADMAP.md). This seed is
+      the single place the series-break and bucket decisions live; models
+      join it rather than re-encoding the mapping. Labels with no data today
+      are mapped anyway so a future PUDL release lands correctly instead of
+      failing silently.
+    columns:
+      - name: source_label
+        description: Raw EIA-930 fuel label, primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: unified_fuel_category
+        description: Governed category the label maps into.
+        data_tests:
+          - not_null
+      - name: source_regime
+        description: legacy, post_2024_break, or both (continuous across the break).
+        data_tests:
+          - not_null
+      - name: is_storage
+        description: True for storage labels.
+      - name: in_mix_denominator
+        description: >
+          Locked denominator decision: false exactly for storage labels
+          (gross generation excluding storage charge/discharge).
+        data_tests:
+          - not_null
+      - name: is_renewable
+        description: Wind, solar, hydro, plus geothermal when present (gate amendment).
+      - name: is_fossil
+        description: Coal, gas, oil.
+      - name: is_carbon_free
+        description: Renewable plus nuclear.
+      - name: notes
+        description: Reporting facts from the Phase 1 profile (validity windows, per-BA absences).
+
+  - name: balancing_authorities
+    description: >
+      The locked BA set (PJM, ERCO, CISO) with names, local timezones, and
+      reporting quirks recorded as data.
+    columns:
+      - name: ba_code
+        description: EIA balancing authority code, primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: ba_name
+        description: Full operator name.
+      - name: iana_timezone
+        description: Operator-local IANA timezone.
+      - name: notes
+        description: Reporting quirks (ERCO petroleum absence; CISO geothermal start date).

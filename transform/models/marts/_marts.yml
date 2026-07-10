@@ -1,0 +1,219 @@
+version: 2
+
+models:
+  - name: fct_hourly_demand
+    description: >
+      Hourly demand fact. Grain: ba_code x datetime_utc (naive UTC hour),
+      unique and continuous per BA. Window starts 2019-01-01 UTC (locked
+      start year, docs/ROADMAP.md); earlier demand exists in landing but is
+      outside the governed window. demand_mwh is the PUDL-imputed series
+      (locked basis); is_imputed and imputation_code surface exactly which
+      hours were imputed and why (integrity rule 3). The Phase 3 semantic
+      layer aggregates from this grain; no metric math lives here.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ba_code
+              - datetime_utc
+    columns:
+      - name: ba_code
+        description: EIA balancing authority code (PJM, ERCO, CISO).
+        data_tests:
+          - not_null
+      - name: datetime_utc
+        description: Hour start, naive UTC timestamp.
+        data_tests:
+          - not_null
+      - name: demand_mwh
+        description: >
+          Demand in MWh, PUDL-imputed series (locked demand basis). Complete
+          within the window.
+        data_tests:
+          - not_null
+          # Basis: PUDL v2026.6.1 envelope: observed PUDL-imputed demand
+          # min 14,372 / max 160,560 MWh; headroom per ROADMAP bounds policy.
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 5000
+                max_value: 250000
+      - name: is_imputed
+        description: True where this hour's demand value was imputed by PUDL.
+      - name: imputation_code
+        description: >
+          PUDL imputation reason; null means not imputed. The 8 accepted
+          values are the codes observed in PUDL v2026.6.1
+          (docs/phase1_data_profile.md section 4).
+        data_tests:
+          # Nulls (non-imputed hours) pass automatically.
+          - accepted_values:
+              arguments:
+                values:
+                  - missing_value
+                  - anomalous_region
+                  - double_delta
+                  - local_outlier_low
+                  - local_outlier_high
+                  - single_delta
+                  - global_outlier
+                  - identical_run
+      - name: demand_reported_mwh
+        description: >
+          As-reported demand, transparency only; contains gaps and sentinel
+          garbage and is never a metric basis (locked decision).
+
+  - name: fct_hourly_generation
+    description: >
+      Hourly generation fact. Grain: ba_code x datetime_utc x
+      unified_fuel_category. Window starts 2019-01-01 UTC (locked start
+      year). Rows exist only where the adjusted value is non-null, so labels
+      outside their regime or absent per BA (oil for ERCO) have no rows.
+      unified_fuel_category and the classification flags come from the
+      governed seed via int_generation__fuel_mapped; source_regime is the
+      2024-07-01 series-break signal (docs/phase1_data_profile.md section
+      10; CISO hydro is the one materially ambiguous unification). No metric
+      math lives here.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ba_code
+              - datetime_utc
+              - unified_fuel_category
+    columns:
+      - name: ba_code
+        description: EIA balancing authority code (PJM, ERCO, CISO).
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_balancing_authority')
+                field: ba_code
+      - name: datetime_utc
+        description: Hour start, naive UTC timestamp.
+        data_tests:
+          - not_null
+      - name: unified_fuel_category
+        description: >
+          Governed fuel category from seeds/fuel_category_mapping.csv,
+          unifying legacy and post-break labels into continuous series.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_fuel_category')
+                field: unified_fuel_category
+          # The 14 unified categories governed by seeds/fuel_category_mapping.csv.
+          - accepted_values:
+              arguments:
+                values:
+                  - coal
+                  - gas
+                  - oil
+                  - nuclear
+                  - other
+                  - unknown
+                  - geothermal
+                  - hydro
+                  - solar
+                  - wind
+                  - battery_storage
+                  - pumped_storage
+                  - other_energy_storage
+                  - unknown_energy_storage
+      - name: net_generation_mwh
+        description: >
+          Net generation in MWh, EIA-adjusted series (locked generation
+          basis). Negative values are physical (storage charging, solar
+          station load at night).
+        data_tests:
+          - not_null
+          # Basis: PUDL v2026.6.1 envelope: observed adjusted generation
+          # min -9,504 / max 75,926 MWh; headroom per ROADMAP bounds policy.
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -20000
+                max_value: 100000
+      - name: source_regime
+        description: >
+          Series-break signal: legacy (label ended at the 2024-07-01
+          recategorization), post_2024_break (label began there), or both
+          (label continuous across it). Any metric window spanning
+          2024-07-01 mixes regimes and must be documented as affected.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - legacy
+                  - post_2024_break
+                  - both
+      - name: is_storage
+        description: True for storage categories.
+      - name: in_mix_denominator
+        description: >
+          Locked denominator decision: gross generation excluding storage
+          charge/discharge. False exactly for storage categories.
+      - name: is_renewable
+        description: >
+          Locked classification: wind, solar, hydro, plus geothermal when
+          present (Phase 1 gate amendment).
+      - name: is_fossil
+        description: >
+          Locked classification: coal, gas, oil. For ERCO, oil is absent
+          from EIA-930 reporting entirely (absence of data, not zero), so
+          ERCO fossil aggregations cover coal plus gas.
+      - name: is_carbon_free
+        description: "Locked classification: renewable plus nuclear."
+      - name: is_imputed_eia
+        description: True where EIA imputed this value (integrity rule 3).
+
+  - name: dim_balancing_authority
+    description: >
+      The locked BA set with reporting quirks recorded as data: ERCO reports
+      no petroleum (absence, not zero); CISO reports geothermal separately
+      only from 2025-12-16.
+    columns:
+      - name: ba_code
+        description: EIA balancing authority code, primary key.
+        data_tests:
+          - unique
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - PJM
+                  - ERCO
+                  - CISO
+      - name: ba_name
+        description: Full operator name.
+      - name: iana_timezone
+        description: >
+          Operator-local IANA timezone, for future local-time analysis. All
+          mart timestamps are UTC.
+      - name: notes
+        description: Reporting quirks that affect interpretation, from the Phase 1 profile.
+
+  - name: dim_fuel_category
+    description: >
+      One row per unified fuel category with the governed classification
+      flags and the source labels feeding it. Flags are uniform within a
+      category by construction of the seed; the singular test
+      assert_fuel_flags_consistent_within_category enforces that.
+    columns:
+      - name: unified_fuel_category
+        description: Governed fuel category, primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: is_storage
+        description: True for storage categories.
+      - name: in_mix_denominator
+        description: False exactly for storage categories (locked denominator decision).
+      - name: is_renewable
+        description: Wind, solar, hydro, plus geothermal when present (gate amendment).
+      - name: is_fossil
+        description: Coal, gas, oil.
+      - name: is_carbon_free
+        description: Renewable plus nuclear.
+      - name: source_labels
+        description: Comma-separated raw EIA-930 labels that map into this category.
