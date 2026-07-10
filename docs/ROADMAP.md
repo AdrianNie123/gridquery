@@ -28,7 +28,7 @@ The phases are not equal. Phases 3 and 5 carry most of the intellectual work and
 - **Metric definitions (from `PRD.md`):** growth = total-annual YoY + window CAGR; renewable = wind/solar/hydro, plus geothermal when present (Phase 1 gate amendment; negligible in-window); carbon-free = renewable + nuclear (separate metric); fossil = coal/gas/petroleum. Weather-normalization is out of scope for v1, named as future work.
 
 ## Outstanding verification task (carry into Phase 2)
-- **Second plausibility anchor:** Phase 1 confirmed 2023 ERCOT demand ≈ 446.79 TWh vs. public ~445–446 TWh. Before trusting the marts, reproduce one more anchor (CISO or PJM, one year, summed demand vs. that operator's publicly reported annual total). Two independent anchors = solid foundation.
+- **Second plausibility anchor: DONE** — recorded in `docs/verification_anchors.md`. CISO 2023 peak demand: mart 44,007 MWh hourly vs CAISO-published 44,534 MW instantaneous (-1.18%, documented hourly-vs-instantaneous definitional difference; peak-demand form substituted because CAISO publishes no annual energy total). ERCOT annual anchor restated there; PJM ~800,000 GWh forecast baseline noted as weak corroboration.
 
 ---
 
