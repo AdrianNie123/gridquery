@@ -24,7 +24,7 @@ A small, governed data product over U.S. grid demand data: clean hourly data →
 
 ## Non-negotiable integrity rules
 1. **Never invent a formula or a number.** Every figure shown anywhere (docs, README, front end) must be produced by the pipeline. No illustrative/placeholder numbers.
-2. **Metrics requiring a judgment call are already decided in `PRD.md`** (growth basis = total-annual YoY + window CAGR; renewable = wind/solar/hydro; carbon-free = renewable + nuclear as a separate metric; fossil = coal/gas/petroleum). Do not silently redefine them. If the data makes a definition untenable, stop and flag it.
+2. **Metrics requiring a judgment call are already decided in `PRD.md`** (growth basis = total-annual YoY + window CAGR; renewable = wind/solar/hydro, plus geothermal when present per the Phase 1 gate amendment recorded in `docs/ROADMAP.md`; carbon-free = renewable + nuclear as a separate metric; fossil = coal/gas/petroleum). Do not silently redefine them. If the data makes a definition untenable, stop and flag it.
 3. **Surface imputation status.** EIA-930 contains imputed values. Do not silently mix imputed and reported values where the distinction matters.
 4. **The LLM never writes raw SQL against source tables.** It selects and parameterizes governed Cube metrics, or it refuses/clarifies.
 5. **Refusal is a feature.** Questions that don't map to a governed metric should be refused or clarified, not answered by guessing.

@@ -78,7 +78,7 @@ Model structure, metric encoding, and growth/partial-year handling stay in the p
 ## Verification (phase done conditions)
 
 - `make cube-up` starts Cube from a clean checkout; `make cube-test` runs the pytest suite green.
-- `/v1/meta` lists all 11 governed metrics and nothing ungoverned.
+- `/v1/meta` exposes exactly the three governed views and their documented members (the 11 named metrics plus the supporting measures listed in `docs/metric_catalog.md`), and nothing else.
 - Both anchors reproduce through the Cube API path exactly.
 - Every metric traceable to a locked definition; catalog documents formula, grain, caveats.
 - Human review before Phase 4.
