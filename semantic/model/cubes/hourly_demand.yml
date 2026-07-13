@@ -4,6 +4,7 @@
 cubes:
   - name: hourly_demand
     sql_table: marts.fct_hourly_demand
+    public: false
     description: >
       Hourly electricity demand by balancing authority, 2019-01-01 onward,
       PUDL-imputed basis. Grain: ba_code x datetime_utc (UTC hour).

@@ -1,0 +1,228 @@
+# Generation cube over marts.fct_hourly_generation
+# (grain: BA x UTC hour x unified fuel category).
+# Value basis is net_generation_adjusted_mwh (locked decision, docs/ROADMAP.md).
+# Classification flags (renewable/fossil/carbon-free/storage/denominator) come
+# from the fuel_category_mapping seed via the mart; this cube only references
+# them, it does not redefine them.
+# Series break: EIA-930 recategorized fuels at 2024-07-01 (local midnight per
+# BA); source_regime carries the signal. Metrics spanning the boundary are
+# affected for CISO hydro (see docs/phase1_data_profile.md section 10).
+cubes:
+  - name: hourly_generation
+    sql_table: marts.fct_hourly_generation
+    public: false
+    description: >
+      Hourly net generation by balancing authority and unified fuel category,
+      2019-01-01 onward, adjusted basis. Grain: ba_code x datetime_utc x
+      unified_fuel_category.
+
+    dimensions:
+      - name: row_key
+        sql: "ba_code || '|' || CAST(datetime_utc AS VARCHAR) || '|' || unified_fuel_category"
+        type: string
+        primary_key: true
+        public: false
+
+      - name: ba_code
+        sql: ba_code
+        type: string
+        description: Balancing authority code (PJM, ERCO, CISO).
+
+      - name: datetime_utc
+        sql: datetime_utc
+        type: time
+        description: Hour-beginning timestamp, UTC.
+
+      - name: unified_fuel_category
+        sql: unified_fuel_category
+        type: string
+        description: >
+          Fuel category unified across the 2024-07-01 EIA-930 recategorization
+          (coal, gas, oil, nuclear, hydro, solar, wind, geothermal, other,
+          unknown, plus storage categories).
+
+      - name: source_regime
+        sql: source_regime
+        type: string
+        description: >
+          Which EIA-930 labeling regime the row came from (legacy,
+          post_2024_break, both). The truthful series-break signal.
+
+      - name: in_mix_denominator
+        sql: in_mix_denominator
+        type: boolean
+        description: True for rows counted in the generation-mix denominator (storage excluded).
+
+      - name: is_imputed_eia
+        sql: is_imputed_eia
+        type: boolean
+        description: True where the generation value was imputed by EIA.
+
+    measures:
+      # Governed metric generation_by_fuel (group by unified_fuel_category).
+      - name: generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        description: >
+          Total net generation (MWh, adjusted basis) over the selection.
+          Includes storage categories when they are selected; the mix
+          denominator below excludes them.
+
+      # Mix denominator: gross generation excluding storage charge/discharge
+      # (locked decision). other/unknown stay in.
+      - name: denominator_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.in_mix_denominator"
+        description: Generation-mix denominator (MWh); excludes storage categories.
+
+      - name: renewable_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.is_renewable"
+        description: Generation from renewable categories (wind, solar, hydro, geothermal).
+
+      - name: fossil_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.is_fossil"
+        description: Generation from fossil categories (coal, gas, oil).
+
+      - name: carbon_free_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.is_carbon_free"
+        description: Generation from carbon-free categories (renewable plus nuclear).
+
+      # Governed share metrics (ratio of sums; null when denominator is zero
+      # or when the numerator fuel is absent from the BA's reporting).
+      - name: renewable_share
+        sql: "{renewable_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Renewable share of generation. Governed metric renewable_share.
+
+      - name: fossil_share
+        sql: "{fossil_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Fossil share of generation. Governed metric fossil_share.
+
+      - name: carbon_free_share
+        sql: "{carbon_free_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Carbon-free share of generation. Governed metric carbon_free_share.
+
+      - name: imputed_generation_rows_share
+        sql: "CAST(count(CASE WHEN {CUBE}.is_imputed_eia THEN 1 END) AS DOUBLE) / NULLIF(count(*), 0)"
+        type: number
+        description: Share of generation rows in the selection whose value is EIA-imputed.
+
+      # Governed metric generation_mix_share, parameterized by fuel: one
+      # measure per unified category so the denominator stays the full mix
+      # denominator regardless of query filters. A null share means the BA
+      # does not report that fuel (absence of data, not zero; e.g. ERCO oil).
+      - name: coal_share
+        sql: "{coal_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Coal share of generation.
+      - name: gas_share
+        sql: "{gas_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Natural gas share of generation.
+      - name: oil_share
+        sql: "{oil_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Petroleum share of generation. Null for ERCO (petroleum absent from its EIA-930 reporting).
+      - name: nuclear_share
+        sql: "{nuclear_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Nuclear share of generation.
+      - name: hydro_share
+        sql: "{hydro_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Hydro share of generation (unified across the 2024-07-01 series break).
+      - name: solar_share
+        sql: "{solar_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Solar share of generation (unified across the 2024-07-01 series break).
+      - name: wind_share
+        sql: "{wind_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Wind share of generation (unified across the 2024-07-01 series break).
+      - name: geothermal_share
+        sql: "{geothermal_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Geothermal share of generation. CISO only, first data 2025-12; null elsewhere.
+      - name: other_share
+        sql: "{other_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Share of generation reported as other (in denominator, no named bucket).
+      - name: unknown_share
+        sql: "{unknown_generation_mwh} / NULLIF({denominator_generation_mwh}, 0)"
+        type: number
+        description: Share of generation reported as unknown (in denominator, no named bucket).
+
+      # Per-fuel generation totals backing the share measures.
+      - name: coal_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.unified_fuel_category = 'coal'"
+        public: false
+      - name: gas_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.unified_fuel_category = 'gas'"
+        public: false
+      - name: oil_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.unified_fuel_category = 'oil'"
+        public: false
+      - name: nuclear_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.unified_fuel_category = 'nuclear'"
+        public: false
+      - name: hydro_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.unified_fuel_category = 'hydro'"
+        public: false
+      - name: solar_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.unified_fuel_category = 'solar'"
+        public: false
+      - name: wind_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.unified_fuel_category = 'wind'"
+        public: false
+      - name: geothermal_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.unified_fuel_category = 'geothermal'"
+        public: false
+      - name: other_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.unified_fuel_category = 'other'"
+        public: false
+      - name: unknown_generation_mwh
+        sql: net_generation_mwh
+        type: sum
+        filters:
+          - sql: "{CUBE}.unified_fuel_category = 'unknown'"
+        public: false

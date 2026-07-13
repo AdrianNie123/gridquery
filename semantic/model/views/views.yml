@@ -1,0 +1,75 @@
+# The governed surface. These views are the ONLY members exposed through the
+# Cube APIs (the underlying cubes are public: false). The Phase 4 NL interface
+# grounds itself in /v1/meta over these views; anything not exposed here is
+# not answerable, by design.
+views:
+  - name: demand
+    description: >
+      Governed demand metrics over hourly data (PUDL-imputed basis, 2019
+      onward, UTC hours). Metrics: total_demand, peak_demand, average_demand,
+      imputed_demand_share.
+    cubes:
+      - join_path: hourly_demand
+        includes:
+          - ba_code
+          - datetime_utc
+          - is_imputed
+          - imputation_code
+          - total_demand_mwh
+          - peak_demand_mwh
+          - average_demand_mwh
+          - hours
+          - imputed_hours
+          - imputed_demand_share
+
+  - name: demand_growth
+    description: >
+      Governed demand growth metrics at BA x calendar-year grain
+      (total-annual basis, complete years only). Metrics: demand_yoy_growth,
+      demand_cagr, annual_total_demand_mwh.
+    cubes:
+      - join_path: annual_demand
+        includes:
+          - ba_code
+          - year
+          - is_complete_year
+          - annual_total_demand_mwh
+          - demand_yoy_growth
+          - demand_cagr
+
+  - name: generation_mix
+    description: >
+      Governed generation and mix metrics over hourly data (adjusted basis,
+      2019 onward, unified fuel categories). Metrics: generation_by_fuel
+      (generation_mwh grouped by unified_fuel_category), renewable_share,
+      fossil_share, carbon_free_share, and per-fuel mix shares. Storage is
+      excluded from the mix denominator. Null shares mean the BA does not
+      report that fuel.
+    cubes:
+      - join_path: hourly_generation
+        includes:
+          - ba_code
+          - datetime_utc
+          - unified_fuel_category
+          - source_regime
+          - in_mix_denominator
+          - is_imputed_eia
+          - generation_mwh
+          - denominator_generation_mwh
+          - renewable_generation_mwh
+          - fossil_generation_mwh
+          - carbon_free_generation_mwh
+          - renewable_share
+          - fossil_share
+          - carbon_free_share
+          - coal_share
+          - gas_share
+          - oil_share
+          - nuclear_share
+          - hydro_share
+          - solar_share
+          - wind_share
+          - geothermal_share
+          - other_share
+          - unknown_share
+          - imputed_generation_rows_share

@@ -1,0 +1,105 @@
+# Annual demand cube: BA x calendar year (UTC), built from the hourly mart.
+# Exists because the locked growth basis is total-annual YoY + window CAGR
+# (docs/ROADMAP.md). Growth metrics are defined over complete calendar years
+# only; the landed window ends mid-2026, and computing "growth" from a partial
+# year would violate integrity rule 1.
+cubes:
+  - name: annual_demand
+    public: false
+    sql: >
+      with annual as (
+        select
+          ba_code,
+          cast(extract(year from datetime_utc) as integer) as year,
+          sum(demand_mwh) as total_demand_mwh,
+          count(*) as hours_observed
+        from marts.fct_hourly_demand
+        group by 1, 2
+      ),
+      flagged as (
+        select
+          *,
+          date_diff(
+            'hour',
+            make_timestamp(year, 1, 1, 0, 0, 0),
+            make_timestamp(year + 1, 1, 1, 0, 0, 0)
+          ) as hours_expected
+        from annual
+      )
+      select
+        ba_code,
+        year,
+        total_demand_mwh,
+        hours_observed,
+        hours_expected,
+        hours_observed >= hours_expected as is_complete_year,
+        lag(total_demand_mwh) over (partition by ba_code order by year)
+          as prev_total_demand_mwh,
+        lag(hours_observed >= hours_expected) over (partition by ba_code order by year)
+          as prev_is_complete_year
+      from flagged
+    description: >
+      Annual electricity demand by balancing authority and calendar year (UTC),
+      PUDL-imputed basis, aggregated from the hourly mart. Growth metrics are
+      defined over complete calendar years only.
+
+    dimensions:
+      - name: row_key
+        sql: "ba_code || '|' || CAST(year AS VARCHAR)"
+        type: string
+        primary_key: true
+        public: false
+
+      - name: ba_code
+        sql: ba_code
+        type: string
+        description: Balancing authority code (PJM, ERCO, CISO).
+
+      - name: year
+        sql: year
+        type: number
+        description: Calendar year (UTC hours).
+
+      - name: is_complete_year
+        sql: is_complete_year
+        type: boolean
+        description: >
+          True when every expected hour of the calendar year is present.
+          Growth metrics return values for complete years only.
+
+    measures:
+      - name: annual_total_demand_mwh
+        sql: total_demand_mwh
+        type: sum
+        description: Total annual demand (MWh). Equals total_demand at year grain.
+
+      - name: demand_yoy_growth
+        type: number
+        sql: >
+          sum(case when {CUBE}.is_complete_year and coalesce({CUBE}.prev_is_complete_year, false)
+                   then {CUBE}.total_demand_mwh end)
+          / nullif(sum(case when {CUBE}.is_complete_year and coalesce({CUBE}.prev_is_complete_year, false)
+                            then {CUBE}.prev_total_demand_mwh end), 0)
+          - 1
+        description: >
+          Year-over-year demand growth: this year's total over last year's
+          total, minus 1. Defined only where both years are complete; null
+          otherwise (partial-year guard). Governed metric demand_yoy_growth.
+          Aggregating several years returns growth of the summed totals.
+
+      - name: demand_cagr
+        type: number
+        sql: >
+          pow(
+            arg_max({CUBE}.total_demand_mwh, {CUBE}.year) filter (where {CUBE}.is_complete_year)
+            / nullif(arg_min({CUBE}.total_demand_mwh, {CUBE}.year) filter (where {CUBE}.is_complete_year), 0),
+            1.0 / nullif(
+              max({CUBE}.year) filter (where {CUBE}.is_complete_year)
+              - min({CUBE}.year) filter (where {CUBE}.is_complete_year), 0)
+          ) - 1
+        description: >
+          Compound annual growth rate of total demand between the first and
+          last complete years in the selection. Governed metric demand_cagr.
+          Valid per balancing authority: group or filter by ba_code; a
+          multi-BA selection without ba_code grouping is not meaningful. Null
+          when the selection spans fewer than two complete years.
