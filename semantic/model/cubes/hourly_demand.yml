@@ -1,0 +1,67 @@
+# Demand cube over marts.fct_hourly_demand (grain: BA x UTC hour).
+# Demand basis is the PUDL-imputed series (locked decision, docs/ROADMAP.md);
+# imputation status is surfaced via is_imputed / imputation_code.
+cubes:
+  - name: hourly_demand
+    sql_table: marts.fct_hourly_demand
+    description: >
+      Hourly electricity demand by balancing authority, 2019-01-01 onward,
+      PUDL-imputed basis. Grain: ba_code x datetime_utc (UTC hour).
+
+    dimensions:
+      - name: row_key
+        sql: "ba_code || '|' || CAST(datetime_utc AS VARCHAR)"
+        type: string
+        primary_key: true
+        public: false
+
+      - name: ba_code
+        sql: ba_code
+        type: string
+        description: Balancing authority code (PJM, ERCO, CISO).
+
+      - name: datetime_utc
+        sql: datetime_utc
+        type: time
+        description: Hour-beginning timestamp, UTC.
+
+      - name: is_imputed
+        sql: is_imputed
+        type: boolean
+        description: True where the demand value was imputed by PUDL rather than reported.
+
+      - name: imputation_code
+        sql: imputation_code
+        type: string
+        description: PUDL imputation reason code; null for reported hours.
+
+    measures:
+      - name: total_demand_mwh
+        sql: demand_mwh
+        type: sum
+        description: Total demand (MWh) over the selected period. Governed metric total_demand.
+
+      - name: peak_demand_mwh
+        sql: demand_mwh
+        type: max
+        description: Maximum hourly demand (MWh) in the selected period. Governed metric peak_demand. Hourly-average basis, not instantaneous.
+
+      - name: average_demand_mwh
+        sql: demand_mwh
+        type: avg
+        description: Mean hourly demand (MWh) over the selected period. Governed metric average_demand.
+
+      - name: hours
+        type: count
+        description: Number of BA-hours in the selection.
+
+      - name: imputed_hours
+        type: count
+        filters:
+          - sql: "{CUBE}.is_imputed"
+        description: Number of BA-hours with PUDL-imputed demand in the selection.
+
+      - name: imputed_demand_share
+        sql: "CAST({imputed_hours} AS DOUBLE) / NULLIF({hours}, 0)"
+        type: number
+        description: Share of hours in the selection whose demand value is imputed. Governed metric imputed_demand_share.

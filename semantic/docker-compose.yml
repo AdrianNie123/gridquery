@@ -1,0 +1,18 @@
+# Cube semantic layer, local dev deployment.
+# Image pinned per docs/plans/phase3.md; do not bump casually.
+services:
+  cube:
+    image: cubejs/cube:v1.6.69
+    container_name: gridquery-cube
+    ports:
+      - "4000:4000"
+    environment:
+      CUBEJS_DEV_MODE: "true"
+      CUBEJS_DB_TYPE: duckdb
+      # No CUBEJS_DB_DUCKDB_DATABASE_PATH: cube.js attaches the warehouse
+      # READ_ONLY instead (dbt is the single writer; see cube.js).
+      # Dev-only secret; this deployment is local and unauthenticated by design.
+      CUBEJS_API_SECRET: gridquery-local-dev-secret
+    volumes:
+      - .:/cube/conf
+      - ../data:/data:ro

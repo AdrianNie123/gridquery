@@ -1,6 +1,6 @@
 # GridQuery task runner.
 
-.PHONY: land profile build dbt-test
+.PHONY: land profile build dbt-test cube-up cube-down cube-test
 
 DBT_FLAGS := --project-dir transform --profiles-dir transform
 
@@ -20,3 +20,14 @@ land:
 # Regenerate the facts behind docs/phase1_data_profile.md from the landed data.
 profile:
 	uv run python scripts/profile_phase1.py
+
+# Start the Cube semantic layer (Docker, pinned image; see semantic/docker-compose.yml).
+cube-up:
+	docker compose -f semantic/docker-compose.yml up -d --wait
+
+cube-down:
+	docker compose -f semantic/docker-compose.yml down
+
+# Run the semantic-layer metric tests against a running Cube instance.
+cube-test:
+	uv run pytest semantic/tests -v
