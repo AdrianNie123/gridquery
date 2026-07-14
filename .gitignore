@@ -6,6 +6,9 @@ data/
 __pycache__/
 *.pyc
 
+# Secrets: API keys live in .env, never committed (.env.example documents the shape)
+.env
+
 # dlt runtime state
 .dlt/secrets.toml
 transform/target/

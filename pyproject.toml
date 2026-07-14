@@ -4,11 +4,14 @@ version = "0.1.0"
 description = "Governed semantic layer with an evaluated NL interface over U.S. grid demand data (EIA-930 via PUDL)"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "anthropic>=0.116.0",
     "dbt-core>=1.9",
     "dbt-duckdb>=1.9",
     "dlt[duckdb]>=1.6",
     "duckdb>=1.1",
     "pyarrow>=18",
+    "pydantic>=2.13.4",
+    "python-dotenv>=1.2.2",
 ]
 
 [tool.uv]
