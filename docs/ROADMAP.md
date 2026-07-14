@@ -8,8 +8,8 @@ The full phase map for the project. Individual phase plans live in `docs/plans/`
 |---|---|---|---|
 | 1 | Data landing & verification | ✅ Complete (gate passed) | Light, but foundation-critical |
 | 2 | dbt staging & marts + tests | ✅ Complete (gate passed 2026-07-13) | Medium (mechanical) |
-| 3 | Cube semantic layer | ▶ In progress | **Heavy — core of project** |
-| 4 | Natural-language interface | Pending | Medium-heavy |
+| 3 | Cube semantic layer | ✅ Complete (gate passed 2026-07-14) | **Heavy — core of project** |
+| 4 | Natural-language interface | ▶ In progress | Medium-heavy |
 | 5 | Evaluation harness | Pending | **Heavy — the differentiator** |
 | 6 | Streamlit front end | Pending | Light-medium |
 | 7 (stretch) | Dagster orchestration | Optional, week 3 | Polish, not load-bearing |
@@ -28,6 +28,14 @@ The phases are not equal. Phases 3 and 5 carry most of the intellectual work and
 - **Metric definitions (from `PRD.md`):** growth = total-annual YoY + window CAGR; renewable = wind/solar/hydro, plus geothermal when present (Phase 1 gate amendment; negligible in-window); carbon-free = renewable + nuclear (separate metric); fossil = coal/gas/petroleum. Weather-normalization is out of scope for v1, named as future work.
 - **Carbon-intensity proxy: deferred to future work.** PRD §11 open decision 5 resolved at Phase 3 planning (2026-07-13). Not built in v1; named in the README limitations/future-work section. Can be added later as one more governed metric with cited emission factors.
 - **Cube runtime: Docker, pinned image.** `cubejs/cube` at a pinned stable tag via docker-compose in `semantic/`. Chosen over Node/npx for reproducibility from a clean checkout. (Locked at Phase 3 planning, 2026-07-13.)
+
+## Locked decisions (Phase 4 planning, 2026-07-14)
+- **NL model: `claude-haiku-4-5`** via the Anthropic API. The task is constrained metric selection over a governed catalog, not open-ended generation. Misinterpretation rate is measured honestly by the Phase 5 eval harness; the model choice is revisited only with that data.
+- **Prompt caching from v1.** The static prefix (grounding rules + metric catalog + `/v1/meta` snapshot) carries a `cache_control` breakpoint; the volatile question comes after it. The prefix is byte-stable (deterministic serialization, no timestamps) and its size is verified against Haiku 4.5's 4096-token cacheable minimum via `count_tokens`.
+- **Phase 5 eval harness uses the Message Batches API** (50% price, results keyed by `custom_id`). Recorded now so the harness is designed for it from the start.
+- **Key handling: `.env`, local-only.** `ANTHROPIC_API_KEY` lives in a gitignored `.env` with a spend cap set in the Anthropic console. Nothing key-related is committed; the app runs locally only.
+- **Deterministic answer rendering.** Code formats answers from Cube result rows; the LLM selects and parameterizes governed metrics but never produces or restates numbers (integrity rule 1). Every answer displays the metric and parameters used (PRD §9 auditability).
+- **Single-shot interaction.** Each question yields exactly one typed outcome: query, refuse, or clarify. No multi-turn dialogue in Phase 4; the Phase 6 front end can loop clarifications by re-asking.
 
 ## Outstanding verification task (carry into Phase 2)
 - **Second plausibility anchor: DONE** — recorded in `docs/verification_anchors.md`. CISO 2023 peak demand: mart 44,007 MWh hourly vs CAISO-published 44,534 MW instantaneous (-1.18%, documented hourly-vs-instantaneous definitional difference; peak-demand form substituted because CAISO publishes no annual energy total). ERCOT annual anchor restated there; PJM ~800,000 GWh forecast baseline noted as weak corroboration.

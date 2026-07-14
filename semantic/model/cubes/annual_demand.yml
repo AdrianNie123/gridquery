@@ -32,7 +32,7 @@ cubes:
         total_demand_mwh,
         hours_observed,
         hours_expected,
-        hours_observed >= hours_expected as is_complete_year,
+        hours_observed == hours_expected as is_complete_year,
         lag(total_demand_mwh) over (partition by ba_code order by year)
           as prev_total_demand_mwh,
         lag(hours_observed >= hours_expected) over (partition by ba_code order by year)
