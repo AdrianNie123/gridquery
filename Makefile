@@ -1,6 +1,6 @@
 # GridQuery task runner.
 
-.PHONY: land profile build dbt-test cube-up cube-down cube-test
+.PHONY: land profile build dbt-test cube-up cube-down cube-test ask nl-test
 
 DBT_FLAGS := --project-dir transform --profiles-dir transform
 
@@ -31,3 +31,11 @@ cube-down:
 # Run the semantic-layer metric tests against a running Cube instance.
 cube-test:
 	uv run pytest semantic/tests -v
+
+# Ask the NL interface one question (needs Cube running and ANTHROPIC_API_KEY in .env).
+ask:
+	uv run python -m nl "$(Q)"
+
+# Run the NL-interface tests (offline unless ANTHROPIC_API_KEY is set).
+nl-test:
+	uv run pytest nl/tests -v
