@@ -9,7 +9,7 @@ The full phase map for the project. Individual phase plans live in `docs/plans/`
 | 1 | Data landing & verification | ✅ Complete (gate passed) | Light, but foundation-critical |
 | 2 | dbt staging & marts + tests | ✅ Complete (gate passed 2026-07-13) | Medium (mechanical) |
 | 3 | Cube semantic layer | ✅ Complete (gate passed 2026-07-14) | **Heavy — core of project** |
-| 4 | Natural-language interface | ▶ In progress | Medium-heavy |
+| 4 | Natural-language interface | ✔ Built & verified 2026-07-14, pending gate review | Medium-heavy |
 | 5 | Evaluation harness | Pending | **Heavy — the differentiator** |
 | 6 | Streamlit front end | Pending | Light-medium |
 | 7 (stretch) | Dagster orchestration | Optional, week 3 | Polish, not load-bearing |
