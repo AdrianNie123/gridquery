@@ -213,6 +213,67 @@ def test_bad_measure_and_bad_ba_code_both_reported(views):
     assert any("MISO" in v for v in violations)
 
 
+# --- 5. governed data window bounds (2019-01-01..2026-05-03) ---
+# Out-of-window requests must be refused by the validator, not just by the
+# prompt's refusal policy. Refuse, never clip: clipping is silent repair.
+
+OUT_OF_WINDOW_RANGES = {
+    "fully-before": ["2016-01-01", "2018-12-31"],
+    "fully-after": ["2027-01-01", "2027-12-31"],
+    "straddles-start": ["2018-06-01", "2019-06-30"],
+    # The rule-7 calendar-year shape for 2026 exceeds the window end; the
+    # prompt tells the model to cap at 2026-05-03 instead.
+    "straddles-end": ["2026-01-01", "2026-12-31"],
+}
+
+
+@pytest.mark.parametrize("case", sorted(OUT_OF_WINDOW_RANGES))
+def test_out_of_window_date_range_rejected(case, views):
+    p = plan(
+        time_dimension=TimeDimension(
+            dimension="demand.datetime_utc", date_range=OUT_OF_WINDOW_RANGES[case]
+        )
+    )
+    violations = validate_plan(p, views)
+    assert any("window" in v for v in violations), f"{case}: {violations}"
+
+
+def test_exact_window_date_range_valid(views):
+    p = plan(
+        time_dimension=TimeDimension(
+            dimension="demand.datetime_utc", date_range=["2019-01-01", "2026-05-03"]
+        )
+    )
+    assert validate_plan(p, views) == []
+
+
+# Year filters are bounded by the interval each operator implies: only
+# operators that request out-of-window data are flagged (gt 2018 implies
+# years >= 2019, so it is valid; notEquals excludes rather than requests).
+YEAR_WINDOW_CASES = [
+    ("equals", "2018", False),
+    ("equals", "2019", True),
+    ("equals", "2026", True),
+    ("equals", "2027", False),
+    ("gt", "2017", False),
+    ("gt", "2018", True),
+    ("gte", "2018", False),
+    ("gte", "2019", True),
+    ("lt", "2027", True),
+    ("lt", "2028", False),
+    ("lte", "2026", True),
+    ("lte", "2027", False),
+    ("notEquals", "2018", True),
+]
+
+
+@pytest.mark.parametrize("op,value,ok", YEAR_WINDOW_CASES)
+def test_year_filter_window_bounds(op, value, ok, views):
+    p = growth_plan([Filter(member="demand_growth.year", operator=op, values=[value])])
+    violations = validate_plan(p, views)
+    assert (violations == []) == ok, f"{op} {value}: {violations}"
+
+
 def test_four_independent_violations_all_reported(views):
     p = QueryPlan(
         view="demand",

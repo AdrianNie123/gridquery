@@ -22,6 +22,38 @@ METRIC_CATALOG_PATH = REPO_ROOT / "docs" / "metric_catalog.md"
 
 ALLOWED_BA_CODES = ("PJM", "ERCO", "CISO")
 
+# The governed data window. Single source of truth: the system prompt states
+# it and the validator enforces it. Update on re-landing, together with the
+# accepted-range bounds policy in dbt.
+DATA_WINDOW_START = "2019-01-01"
+DATA_WINDOW_END = "2026-05-03"
+
+SERIES_BREAK_DATE = "2024-07-01"
+
+# Caveat text attached to answers by nl/answer.py when the queried slice
+# warrants it. The text lives here with the other governed facts (BA codes,
+# window); the slice conditions live in the renderer. Each caveat restates a
+# locked data decision from docs/ROADMAP.md / docs/metric_catalog.md.
+CAVEATS = {
+    "series_break": (
+        "Window spans the 2024-07-01 EIA-930 fuel recategorization; unified "
+        "series carry the break (CISO hydro is the ambiguous case). See the "
+        "metric catalog."
+    ),
+    "imputation_mix": (
+        "Demand values mix reported and PUDL-imputed hours; the "
+        "imputed_demand_share metric quantifies the mix for this slice."
+    ),
+    "growth_complete_years": (
+        "Growth is defined over complete calendar years only; the partial "
+        "year 2026 returns null by design."
+    ),
+    "mix_nulls": (
+        "Null means the BA does not report that fuel (absence of data, not "
+        "zero); ERCO reports no petroleum."
+    ),
+}
+
 GROUNDING_RULES = """\
 You translate a single natural-language question about U.S. grid demand and
 generation into exactly one structured outcome. You never write SQL and you
@@ -124,7 +156,9 @@ def build_system_prompt(views: dict) -> str:
     return (
         GROUNDING_RULES
         + f"\nAllowed ba_code values: {allowed}.\n"
-        + "Data window: 2019-01-01 through 2026-05-03 (2026 is a partial year).\n\n"
+        + f"Data window: {DATA_WINDOW_START} through {DATA_WINDOW_END} "
+        + "(2026 is a partial year). Date ranges must stay inside this window; "
+        + f"a question about 2026 uses end date {DATA_WINDOW_END}.\n\n"
         + _surface_section(views)
         + "\n\n--- METRIC CATALOG ---\n\n"
         + catalog_text

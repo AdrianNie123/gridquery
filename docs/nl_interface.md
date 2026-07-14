@@ -46,6 +46,7 @@ The model is not trusted to stay on the governed surface; `nl/validator.py` guar
 
 - The view must be governed; every measure, dimension, and filter member must exist on that view.
 - Filter values are checked against allowed sets: `ba_code` values must be in PJM/ERCO/CISO, year filters must be plain four-digit years, date ranges must be ordered ISO dates, order members must be selected in the plan, and the row limit is capped.
+- The governed data window (2019-01-01 through 2026-05-03, defined once in `nl/catalog.py`) is enforced, not just stated in the prompt: date ranges must lie inside it, and year filters may not request data outside it. The year check follows the interval each operator implies, so `gt 2018` (years 2019 and later) is valid while `gte 2018` is not, and `notEquals` is unbounded because it excludes rather than requests. Out-of-window plans are refused, never clipped: clipping is silent repair.
 - Any violation converts the plan to a refusal listing what went wrong (`nl/interface.py`). Invalid plans are never silently repaired: a repair would substitute the code's guess for the model's, which is the same integrity problem one layer down.
 
 The executor (`nl/executor.py`) touches exactly one Cube endpoint, `/cubejs-api/v1/load`, and only with plans that passed the validator. It translates the `QueryPlan` into Cube's REST query format, waits through Cube's "Continue wait" long-query handshake, and surfaces Cube errors as errors rather than swallowing them. There is no SQL anywhere in `nl/`; the LLM cannot emit it and the code never constructs it.
@@ -56,7 +57,7 @@ Between them, the two Cube endpoints (`/v1/meta` read at startup, `/v1/load` for
 
 Every number shown to the user comes straight from Cube result rows, formatted by code in `nl/answer.py`. The LLM never produces or restates a figure (integrity rule 1 in `CLAUDE.md`); its output ends at the plan.
 
-Every answer displays the governed metric and the exact parameters used (filters, period, granularity, grouping), so the answer is auditable back to a named, version-controlled metric definition (PRD section 9). The renderer also attaches caveat lines when the queried slice warrants them:
+Every answer displays the governed metric and the exact parameters used (filters, period, granularity, grouping), so the answer is auditable back to a named, version-controlled metric definition (PRD section 9). The renderer also attaches caveat lines when the queried slice warrants them. The caveat text is defined in `nl/catalog.py` alongside the other governed facts (BA codes, data window); the renderer holds only the slice conditions:
 
 - Demand answers that do not filter on imputation status note that the values mix reported and PUDL-imputed hours, and point to `imputed_demand_share` for the same slice.
 - Generation-mix answers whose window spans 2024-07-01 (or has no date bound) note the EIA-930 fuel recategorization break, with CISO hydro flagged as the ambiguous case.
@@ -71,8 +72,8 @@ The model is `claude-haiku-4-5` (`nl/planner.py`). The task is constrained metri
 
 The system prompt (grounding rules + governed surface + metric catalog) is the static prefix and carries a `cache_control: {type: ephemeral}` breakpoint; the question is the only volatile content and comes after it. Because the prefix is byte-stable, every question after the first reads the prefix from cache instead of paying for it as fresh input. Measured on 2026-07-14 from the pipeline's own usage telemetry:
 
-- The cached system prefix measures 7,754 tokens by the Anthropic `count_tokens` endpoint for `claude-haiku-4-5`, comfortably above Haiku 4.5's 4,096-token minimum cacheable prefix.
-- A cached question showed usage of 19 uncached input tokens, 7,754 cache-read tokens, and 121 output tokens.
+- The cached prefix measures 7,780 tokens by the API's cache-write/cache-read counters, comfortably above Haiku 4.5's 4,096-token minimum cacheable prefix. Of that, the system prompt alone counts 5,812 tokens by the Anthropic `count_tokens` endpoint; the remainder is the structured-output schema, which sits in the prefix and is cached with it.
+- A cached question showed usage of 19 uncached input tokens, 7,780 cache-read tokens, and 121 output tokens.
 
 So the per-question marginal cost is dominated by cache reads and a few dozen fresh tokens, not the full catalog. The CLI prints the usage counters after every answer so cache behavior stays observable. The Phase 5 eval harness will run its ~50-question golden set through the Message Batches API (locked decision, `docs/ROADMAP.md`); the harness is being designed for it from the start.
 

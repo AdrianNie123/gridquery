@@ -8,9 +8,8 @@ plus catalog caveats where the queried slice warrants them.
 
 from dataclasses import dataclass, field
 
+from nl.catalog import CAVEATS, SERIES_BREAK_DATE
 from nl.schema import QueryPlan
-
-SERIES_BREAK_DATE = "2024-07-01"
 
 # Members rendered as percentages (ratios in the data model).
 _PERCENT_HINTS = ("_share", "yoy_growth", "cagr")
@@ -88,29 +87,16 @@ def _caveats(plan: QueryPlan, rows: list[dict]) -> list[str]:
         and td.date_range[0] <= SERIES_BREAK_DATE <= td.date_range[1]
     )
     if plan.view == "generation_mix" and (spans_break or td is None or td.date_range is None):
-        notes.append(
-            "Window spans the 2024-07-01 EIA-930 fuel recategorization; unified "
-            "series carry the break (CISO hydro is the ambiguous case). See the "
-            "metric catalog."
-        )
+        notes.append(CAVEATS["series_break"])
     if plan.view == "demand" and not any(
         f.member.endswith(".is_imputed") for f in plan.filters
     ):
-        notes.append(
-            "Demand values mix reported and PUDL-imputed hours; the "
-            "imputed_demand_share metric quantifies the mix for this slice."
-        )
+        notes.append(CAVEATS["imputation_mix"])
     if plan.view == "demand_growth":
-        notes.append(
-            "Growth is defined over complete calendar years only; the partial "
-            "year 2026 returns null by design."
-        )
+        notes.append(CAVEATS["growth_complete_years"])
     has_nulls = any(v is None for row in rows for v in row.values())
     if plan.view == "generation_mix" and has_nulls:
-        notes.append(
-            "Null means the BA does not report that fuel (absence of data, not "
-            "zero); ERCO reports no petroleum."
-        )
+        notes.append(CAVEATS["mix_nulls"])
     return notes
 
 
