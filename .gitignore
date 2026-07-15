@@ -9,6 +9,11 @@ __pycache__/
 # Secrets: API keys live in .env, never committed (.env.example documents the shape)
 .env
 
+# Eval run artifacts: timestamped runs and raw batch output stay local;
+# latest.json is committed at the phase gate for provenance
+eval/results/*
+!eval/results/latest.json
+
 # dlt runtime state
 .dlt/secrets.toml
 transform/target/

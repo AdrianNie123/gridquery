@@ -1,6 +1,6 @@
 # GridQuery task runner.
 
-.PHONY: land profile build dbt-test cube-up cube-down cube-test ask nl-test
+.PHONY: land profile build dbt-test cube-up cube-down cube-test ask nl-test eval eval-pin eval-score eval-report eval-test
 
 DBT_FLAGS := --project-dir transform --profiles-dir transform
 
@@ -39,3 +39,23 @@ ask:
 # Run the NL-interface tests (offline unless ANTHROPIC_API_KEY is set).
 nl-test:
 	uv run pytest nl/tests -v
+
+# Pin expected eval results by executing the golden plans against running Cube.
+eval-pin:
+	uv run python -m eval pin
+
+# Full eval run: submit the golden set via the Batches API, score, write artifact + report.
+eval:
+	uv run python -m eval run
+
+# Re-score a saved raw batch (no API cost): make eval-score RAW=eval/results/raw_<id>.jsonl
+eval-score:
+	uv run python -m eval score --raw "$(RAW)"
+
+# Regenerate docs/eval_report.md from eval/results/latest.json.
+eval-report:
+	uv run python -m eval report
+
+# Run the eval-harness tests (offline, no API key needed).
+eval-test:
+	uv run pytest eval/tests -v
