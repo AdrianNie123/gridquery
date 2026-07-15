@@ -9,9 +9,9 @@ The full phase map for the project. Individual phase plans live in `docs/plans/`
 | 1 | Data landing & verification | ✅ Complete (gate passed) | Light, but foundation-critical |
 | 2 | dbt staging & marts + tests | ✅ Complete (gate passed 2026-07-13) | Medium (mechanical) |
 | 3 | Cube semantic layer | ✅ Complete (gate passed 2026-07-14) | **Heavy — core of project** |
-| 4 | Natural-language interface | ✔ Built & verified 2026-07-14, pending gate review | Medium-heavy |
-| 5 | Evaluation harness | Pending | **Heavy — the differentiator** |
-| 6 | Streamlit front end | Pending | Light-medium |
+| 4 | Natural-language interface | ✅ Complete (gate passed 2026-07-15) | Medium-heavy |
+| 5 | Evaluation harness | In progress (plan approved 2026-07-15, `docs/plans/phase5.md`) | **Heavy — the differentiator** |
+| 6 | Streamlit front end | In progress (delegated build, `docs/plans/phase6.md`) | Light-medium |
 | 7 (stretch) | Dagster orchestration | Optional, week 3 | Polish, not load-bearing |
 
 The phases are not equal. Phases 3 and 5 carry most of the intellectual work and most of the timeline risk. The scope-control rule in `PRD.md` §12 watches those two: if semantic layer + eval harness exceed ~40% of total time by end of week 2, cut the free-form NL interface to parameterized queries and keep everything else. Phases can be split at a gate if they prove harder than expected; the count is not sacred, the gates are.
@@ -36,6 +36,15 @@ The phases are not equal. Phases 3 and 5 carry most of the intellectual work and
 - **Key handling: `.env`, local-only.** `ANTHROPIC_API_KEY` lives in a gitignored `.env` with a spend cap set in the Anthropic console. Nothing key-related is committed; the app runs locally only.
 - **Deterministic answer rendering.** Code formats answers from Cube result rows; the LLM selects and parameterizes governed metrics but never produces or restates numbers (integrity rule 1). Every answer displays the metric and parameters used (PRD §9 auditability).
 - **Single-shot interaction.** Each question yields exactly one typed outcome: query, refuse, or clarify. No multi-turn dialogue in Phase 4; the Phase 6 front end can loop clarifications by re-asking.
+
+## Locked decisions (Phase 5/6 planning, 2026-07-15)
+- **Phase 4 gate closed 2026-07-15:** 179 nl tests green (offline + live smoke incl. refusal, clarification, ERCOT anchor, cache-hit assertion), 24 Cube tests green.
+- **Execution structure:** Phase 5 is built in the primary session with bounded subagent tasks (scorer test suite, report generator, question-phrasing drafts). Phase 6 is delegated to a parallel worktree agent working from the frozen `ask()` contract (`docs/plans/phase6.md` is self-contained). Each phase gets its own human gate review.
+- **Golden set integrity split:** the hand-authored `eval/golden_set.yaml` contains questions and expected plans but no numbers; every expected numeric value lives in `eval/golden_results.json`, produced only by executing the hand-authored golden plans against the tested Cube layer (`make eval-pin`). Integrity rule 1 enforced structurally. Regeneration policy: a pin diff without a corresponding data change is a stop-and-investigate event.
+- **Scoring semantics:** exact plan match rejected (equivalent plans exist). Three deterministic checks per query question: outcome kind, metric selection with period canonicalization, result match through the real validator + executor. Numeric tolerance `rel_tol=1e-6` (same engine, same data); never loosened without investigation. Refuse/clarify score on outcome kind only; no LLM-as-judge in v1.
+- **Composition:** 35 query (all 11 metrics covered) / 10 refuse / 5 clarify.
+- **Eval artifact contract:** `eval/results/latest.json` (committed at the gate) is the single artifact consumed by `docs/eval_report.md` and the Streamlit eval page; it records actual batch token usage and cost, never assumed rates.
+- **Front end:** Streamlit app in `app/` with NL page, demand-growth leaderboard, generation-mix breakdown (all numbers through the governed layer), plus an eval-results page rendering `latest.json` with graceful degradation. New deps approved: `pyyaml`, `streamlit`.
 
 ## Outstanding verification task (carry into Phase 2)
 - **Second plausibility anchor: DONE** — recorded in `docs/verification_anchors.md`. CISO 2023 peak demand: mart 44,007 MWh hourly vs CAISO-published 44,534 MW instantaneous (-1.18%, documented hourly-vs-instantaneous definitional difference; peak-demand form substituted because CAISO publishes no annual energy total). ERCOT annual anchor restated there; PJM ~800,000 GWh forecast baseline noted as weak corroboration.
