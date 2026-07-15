@@ -23,22 +23,13 @@ def _usage_dict(usage) -> dict:
     }
 
 
-def ask(
-    question: str,
-    views: dict | None = None,
-    client: anthropic.Anthropic | None = None,
-) -> Answer:
-    """Answer one natural-language question through the governed stack.
+def resolve_outcome(parsed, views: dict, usage: dict) -> Answer:
+    """Turn one planner outcome into an Answer: validator -> executor -> renderer.
 
-    views can be passed in to reuse a /v1/meta fetch across questions
-    (the eval harness does this); by default it is fetched fresh.
+    Everything after the LLM call lives here so the Phase 5 eval harness
+    can feed batch-parsed planner responses through the exact code the
+    live path runs, not a reimplementation.
     """
-    if views is None:
-        views = governed_views(fetch_meta())
-    system_prompt = build_system_prompt(views)
-
-    parsed, usage = plan_question(question, system_prompt, client=client)
-    usage = _usage_dict(usage)
     outcome = parsed.outcome
 
     if outcome.action == "refuse":
@@ -58,3 +49,21 @@ def ask(
 
     rows = execute_plan(outcome.plan)
     return render_answer(outcome.metric, outcome.plan, rows, usage)
+
+
+def ask(
+    question: str,
+    views: dict | None = None,
+    client: anthropic.Anthropic | None = None,
+) -> Answer:
+    """Answer one natural-language question through the governed stack.
+
+    views can be passed in to reuse a /v1/meta fetch across questions
+    (the eval harness does this); by default it is fetched fresh.
+    """
+    if views is None:
+        views = governed_views(fetch_meta())
+    system_prompt = build_system_prompt(views)
+
+    parsed, usage = plan_question(question, system_prompt, client=client)
+    return resolve_outcome(parsed, views, _usage_dict(usage))
