@@ -6,7 +6,7 @@ data/
 __pycache__/
 *.pyc
 
-# Secrets: API keys live in .env, never committed (.env.example documents the shape)
+# Secrets: keys live in .env, never committed (.env.example documents the shape)
 .env
 
 # Eval run artifacts: timestamped runs and raw batch output stay local;
