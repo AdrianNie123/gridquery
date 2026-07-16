@@ -46,6 +46,12 @@ The phases are not equal. Phases 3 and 5 carry most of the intellectual work and
 - **Eval artifact contract:** `eval/results/latest.json` (committed at the gate) is the single artifact consumed by `docs/eval_report.md` and the Streamlit eval page; it records actual batch token usage and cost, never assumed rates.
 - **Front end:** Streamlit app in `app/` with NL page, demand-growth leaderboard, generation-mix breakdown (all numbers through the governed layer), plus an eval-results page rendering `latest.json` with graceful degradation. New deps approved: `pyyaml`, `streamlit`.
 
+## Phase 5 status (2026-07-16): complete, pending human gate review
+- **First full eval run completed** (batch `msgbatch_01V4JfrDuneRDGsuUTFcFTZ5`, 50/50 succeeded, $0.18 actual). As-measured results in `docs/eval_report.md`: overall 86.0%, metric selection 82.9%, result 88.6%, refusal 100%, clarify 80%.
+- **One harness bug found and fixed during failure analysis** (commit `ccc0e96`): the grouping-set check scored 20 semantically equivalent plans as `wrong_parameter` (model filters to one BA and also groups by `ba_code`, a constant label column; every result check passed against pinned rows). Fixed as a canonicalization, consistent with the locked scoring semantics; re-scored from the saved raw batch at no API cost. Numeric tolerance untouched.
+- **7 genuine failures remain, none miscategorized:** 4 wrong refusals (incl. a nonsense out-of-window claim for 2022 and one validator-caught invalid plan ordering by an unselected member), 2 metric mislabels (solar/hydro share labeled `renewable_share`; plans and rows correct), 1 ambiguous question answered instead of clarified. Human reviews this analysis at the gate.
+- **Execution-structure amendment:** Phase 6 built inline in the main tree after Phase 5 (user decision 2026-07-16), not via the parallel worktree agent; the frozen-contract rule in `docs/plans/phase6.md` still binds.
+
 ## Outstanding verification task (carry into Phase 2)
 - **Second plausibility anchor: DONE** — recorded in `docs/verification_anchors.md`. CISO 2023 peak demand: mart 44,007 MWh hourly vs CAISO-published 44,534 MW instantaneous (-1.18%, documented hourly-vs-instantaneous definitional difference; peak-demand form substituted because CAISO publishes no annual energy total). ERCOT annual anchor restated there; PJM ~800,000 GWh forecast baseline noted as weak corroboration.
 

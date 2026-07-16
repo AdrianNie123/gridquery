@@ -1,0 +1,2422 @@
+{
+  "run_id": "2026-07-16T17:55:10Z",
+  "git_commit": "ccc0e96",
+  "model": "claude-haiku-4-5",
+  "batch_id": "msgbatch_01V4JfrDuneRDGsuUTFcFTZ5",
+  "golden_set_sha256": "bd4d7c43eea439c46a3e8507a9c8c2115d2f284d1b96c5238cd750511aefed84",
+  "golden_results_sha256": "b557c72e8a4cf328cf604feafce6cffcb9894b9236668eb7c50064f70a42fe56",
+  "system_prompt_sha256": "dac40d42e59621350968b85bf7b9358f92f0eb35dd35a0aacd0d1f9255a2a5ef",
+  "counts": {
+    "total": 50,
+    "query": 35,
+    "refuse": 10,
+    "clarify": 5
+  },
+  "aggregate": {
+    "overall_accuracy": 0.86,
+    "metric_selection_accuracy": 0.8286,
+    "result_accuracy": 0.8857,
+    "refusal_accuracy": 1.0,
+    "clarify_accuracy": 0.8
+  },
+  "failure_modes": {
+    "wrong_metric": 2,
+    "wrong_parameter": 0,
+    "wrong_period": 0,
+    "refusal_should_have_answered": 4,
+    "answered_should_have_refused": 0,
+    "clarified_should_have_answered": 0,
+    "answered_should_have_clarified": 1
+  },
+  "usage": {
+    "input_tokens": 955,
+    "output_tokens": 5493,
+    "cache_read_input_tokens": 140040,
+    "cache_creation_input_tokens": 248960,
+    "estimated_cost_usd": 0.1768,
+    "pricing_basis": "claude-haiku-4-5 Batches API, 2026-07: $0.50/$2.50 per MTok in/out, cache read $0.05, cache write (5m) $0.625"
+  },
+  "questions": [
+    {
+      "id": "q01_total_demand_ranking_2023",
+      "question": "Which balancing authority had the highest total demand in 2023?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "total_demand",
+      "actual_metric": "total_demand",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.total_demand_mwh"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": [
+          {
+            "member": "demand.total_demand_mwh",
+            "direction": "desc"
+          }
+        ]
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 19,
+        "output_tokens": 117,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q02_total_demand_erco_2022",
+      "question": "What was ERCOT total demand in 2022?",
+      "expected_kind": "query",
+      "actual_kind": "refusal",
+      "expected_metric": "total_demand",
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": false
+      },
+      "passed": false,
+      "failure_mode": "refusal_should_have_answered",
+      "detail": "Not answerable through the governed metrics: The question requests data from 2022, but the governed data window begins 2019-01-01 and the earliest complete data available is from 2019 onward. The data landing ended 2026-05-03. 2022 is outside the data window available through the GridQuery semantic layer.",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 18,
+        "output_tokens": 84,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q03_total_demand_pjm_2019",
+      "question": "How much total demand did PJM have in 2019?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "total_demand",
+      "actual_metric": "total_demand",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.total_demand_mwh"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand.ba_code",
+            "operator": "equals",
+            "values": [
+              "PJM"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2019-01-01",
+            "2019-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 19,
+        "output_tokens": 122,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q04_total_demand_ciso_2024",
+      "question": "What was CISO total demand in 2024?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "total_demand",
+      "actual_metric": "total_demand",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.total_demand_mwh"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand.ba_code",
+            "operator": "equals",
+            "values": [
+              "CISO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2024-01-01",
+            "2024-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 17,
+        "output_tokens": 122,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q05_peak_demand_ranking_2023",
+      "question": "Rank balancing authorities by peak demand in 2023.",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "peak_demand",
+      "actual_metric": "peak_demand",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.peak_demand_mwh"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": [
+          {
+            "member": "demand.peak_demand_mwh",
+            "direction": "desc"
+          }
+        ]
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 18,
+        "output_tokens": 121,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q06_peak_demand_erco_2024",
+      "question": "What was ERCOT peak hourly demand in 2024?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "peak_demand",
+      "actual_metric": "peak_demand",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.peak_demand_mwh"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand.ba_code",
+            "operator": "equals",
+            "values": [
+              "ERCO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2024-01-01",
+            "2024-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 20,
+        "output_tokens": 122,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q07_peak_demand_ciso_2021",
+      "question": "What was CISO peak hourly demand in 2021?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "peak_demand",
+      "actual_metric": "peak_demand",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.peak_demand_mwh"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand.ba_code",
+            "operator": "equals",
+            "values": [
+              "CISO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2021-01-01",
+            "2021-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 19,
+        "output_tokens": 122,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q08_average_demand_pjm_2023",
+      "question": "What was PJM average hourly demand in 2023?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "average_demand",
+      "actual_metric": "average_demand",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.average_demand_mwh"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand.ba_code",
+            "operator": "equals",
+            "values": [
+              "PJM"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 19,
+        "output_tokens": 122,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q09_average_demand_erco_2020",
+      "question": "What was ERCOT average hourly demand in 2020?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "average_demand",
+      "actual_metric": "average_demand",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.average_demand_mwh"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand.ba_code",
+            "operator": "equals",
+            "values": [
+              "ERCO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2020-01-01",
+            "2020-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 20,
+        "output_tokens": 122,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q10_yoy_growth_erco_2023",
+      "question": "What was ERCOT demand year-over-year growth for 2023?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "demand_yoy_growth",
+      "actual_metric": "demand_yoy_growth",
+      "actual_plan": {
+        "view": "demand_growth",
+        "measures": [
+          "demand_growth.demand_yoy_growth"
+        ],
+        "dimensions": [
+          "demand_growth.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand_growth.ba_code",
+            "operator": "equals",
+            "values": [
+              "ERCO"
+            ]
+          },
+          {
+            "member": "demand_growth.year",
+            "operator": "equals",
+            "values": [
+              "2023"
+            ]
+          }
+        ],
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 23,
+        "output_tokens": 118,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q11_yoy_growth_ciso_2022",
+      "question": "What was CISO demand year-over-year growth for 2022?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "demand_yoy_growth",
+      "actual_metric": "demand_yoy_growth",
+      "actual_plan": {
+        "view": "demand_growth",
+        "measures": [
+          "demand_growth.demand_yoy_growth"
+        ],
+        "dimensions": [
+          "demand_growth.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand_growth.ba_code",
+            "operator": "equals",
+            "values": [
+              "CISO"
+            ]
+          },
+          {
+            "member": "demand_growth.year",
+            "operator": "equals",
+            "values": [
+              "2022"
+            ]
+          }
+        ],
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 22,
+        "output_tokens": 118,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q12_yoy_growth_pjm_2024",
+      "question": "What was PJM demand year-over-year growth for 2024?",
+      "expected_kind": "query",
+      "actual_kind": "refusal",
+      "expected_metric": "demand_yoy_growth",
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": false
+      },
+      "passed": false,
+      "failure_mode": "refusal_should_have_answered",
+      "detail": "Not answerable through the governed metrics: the proposed query left the governed surface (order member 'demand_growth.year' is not selected in the plan)",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 22,
+        "output_tokens": 140,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q13_yoy_growth_partial_2026_erco",
+      "question": "What is ERCOT demand year-over-year growth for 2026?",
+      "expected_kind": "query",
+      "actual_kind": "refusal",
+      "expected_metric": "demand_yoy_growth",
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": false
+      },
+      "passed": false,
+      "failure_mode": "refusal_should_have_answered",
+      "detail": "Not answerable through the governed metrics: 2026 is a partial year (data ends 2026-05-03) and demand_growth metrics require complete calendar years by design. Year-over-year growth for 2026 returns null and cannot be computed from five months of data.",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 23,
+        "output_tokens": 70,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q14_cagr_erco_2019_2024",
+      "question": "What was ERCOT demand CAGR from 2019 to 2024?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "demand_cagr",
+      "actual_metric": "demand_cagr",
+      "actual_plan": {
+        "view": "demand_growth",
+        "measures": [
+          "demand_growth.demand_cagr"
+        ],
+        "dimensions": [
+          "demand_growth.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand_growth.ba_code",
+            "operator": "equals",
+            "values": [
+              "ERCO"
+            ]
+          },
+          {
+            "member": "demand_growth.year",
+            "operator": "gte",
+            "values": [
+              "2019"
+            ]
+          },
+          {
+            "member": "demand_growth.year",
+            "operator": "lte",
+            "values": [
+              "2024"
+            ]
+          }
+        ],
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 26,
+        "output_tokens": 142,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q15_cagr_pjm_2020_2025",
+      "question": "What was PJM demand CAGR from 2020 to 2025?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "demand_cagr",
+      "actual_metric": "demand_cagr",
+      "actual_plan": {
+        "view": "demand_growth",
+        "measures": [
+          "demand_growth.demand_cagr"
+        ],
+        "dimensions": [
+          "demand_growth.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand_growth.ba_code",
+            "operator": "equals",
+            "values": [
+              "PJM"
+            ]
+          },
+          {
+            "member": "demand_growth.year",
+            "operator": "gte",
+            "values": [
+              "2020"
+            ]
+          },
+          {
+            "member": "demand_growth.year",
+            "operator": "lte",
+            "values": [
+              "2025"
+            ]
+          },
+          {
+            "member": "demand_growth.is_complete_year",
+            "operator": "equals",
+            "values": [
+              "true"
+            ]
+          }
+        ],
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 25,
+        "output_tokens": 169,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q16_cagr_ciso_2019_2025",
+      "question": "What was CISO demand CAGR from 2019 to 2025?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "demand_cagr",
+      "actual_metric": "demand_cagr",
+      "actual_plan": {
+        "view": "demand_growth",
+        "measures": [
+          "demand_growth.demand_cagr"
+        ],
+        "dimensions": [
+          "demand_growth.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand_growth.ba_code",
+            "operator": "equals",
+            "values": [
+              "CISO"
+            ]
+          },
+          {
+            "member": "demand_growth.year",
+            "operator": "gte",
+            "values": [
+              "2019"
+            ]
+          },
+          {
+            "member": "demand_growth.year",
+            "operator": "lte",
+            "values": [
+              "2025"
+            ]
+          }
+        ],
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 25,
+        "output_tokens": 158,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q17_generation_by_fuel_erco_2023",
+      "question": "Break down ERCOT generation by fuel in 2023.",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "generation_by_fuel",
+      "actual_metric": "generation_by_fuel",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.generation_mwh"
+        ],
+        "dimensions": [
+          "generation_mix.unified_fuel_category"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "ERCO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 19,
+        "output_tokens": 134,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q18_generation_by_fuel_ciso_2024_break",
+      "question": "Break down CISO generation by fuel in 2024.",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "generation_by_fuel",
+      "actual_metric": "generation_by_fuel",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.generation_mwh"
+        ],
+        "dimensions": [
+          "generation_mix.unified_fuel_category"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "CISO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2024-01-01",
+            "2024-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 18,
+        "output_tokens": 134,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q19_generation_by_fuel_pjm_2022",
+      "question": "Break down PJM generation by fuel in 2022.",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "generation_by_fuel",
+      "actual_metric": "generation_by_fuel",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.generation_mwh"
+        ],
+        "dimensions": [
+          "generation_mix.unified_fuel_category"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "PJM"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2022-01-01",
+            "2022-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 18,
+        "output_tokens": 134,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q20_mix_share_coal_pjm_2023",
+      "question": "What was coal's generation mix share in PJM in 2023?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "generation_mix_share",
+      "actual_metric": "generation_mix_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.coal_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "PJM"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 21,
+        "output_tokens": 130,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q21_mix_share_gas_erco_2023",
+      "question": "What was natural gas share of generation in ERCOT in 2023?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "generation_mix_share",
+      "actual_metric": "generation_mix_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.gas_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "ERCO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 22,
+        "output_tokens": 130,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q22_mix_share_solar_ciso_2025",
+      "question": "What was solar share of generation in CISO in 2025?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "generation_mix_share",
+      "actual_metric": "renewable_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.solar_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "CISO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2025-01-01",
+            "2025-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": false,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": false,
+      "failure_mode": "wrong_metric",
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 20,
+        "output_tokens": 128,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q23_mix_share_hydro_ciso_2024",
+      "question": "What was hydro share of generation in CISO in 2024?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "generation_mix_share",
+      "actual_metric": "renewable_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.hydro_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "CISO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2024-01-01",
+            "2024-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": false,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": false,
+      "failure_mode": "wrong_metric",
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 21,
+        "output_tokens": 129,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q24_renewable_share_ranking_2023",
+      "question": "Rank balancing authorities by renewable share in 2023.",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "renewable_share",
+      "actual_metric": "renewable_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.renewable_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": [
+          {
+            "member": "generation_mix.renewable_share",
+            "direction": "desc"
+          }
+        ]
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 18,
+        "output_tokens": 123,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q25_renewable_share_erco_2024",
+      "question": "What was ERCOT renewable share in 2024?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "renewable_share",
+      "actual_metric": "renewable_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.renewable_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "ERCO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2024-01-01",
+            "2024-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 18,
+        "output_tokens": 128,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q26_renewable_share_ciso_2025",
+      "question": "What was CISO renewable share in 2025?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "renewable_share",
+      "actual_metric": "renewable_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.renewable_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "CISO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2025-01-01",
+            "2025-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 17,
+        "output_tokens": 128,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q27_fossil_share_ranking_2023",
+      "question": "Rank balancing authorities by fossil share in 2023.",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "fossil_share",
+      "actual_metric": "fossil_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.fossil_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": [
+          {
+            "member": "generation_mix.fossil_share",
+            "direction": "desc"
+          }
+        ]
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 18,
+        "output_tokens": 123,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q28_fossil_share_erco_2023",
+      "question": "What was ERCOT fossil share in 2023?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "fossil_share",
+      "actual_metric": "fossil_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.fossil_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "ERCO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 18,
+        "output_tokens": 128,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q29_fossil_share_pjm_2022",
+      "question": "What was PJM fossil share in 2022?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "fossil_share",
+      "actual_metric": "fossil_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.fossil_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "PJM"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2022-01-01",
+            "2022-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 17,
+        "output_tokens": 128,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q30_carbon_free_ranking_2023",
+      "question": "Rank balancing authorities by carbon-free share in 2023.",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "carbon_free_share",
+      "actual_metric": "carbon_free_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.carbon_free_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": [
+          {
+            "member": "generation_mix.carbon_free_share",
+            "direction": "desc"
+          }
+        ]
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 20,
+        "output_tokens": 136,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q31_carbon_free_ciso_2025",
+      "question": "What was CISO carbon-free share in 2025?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "carbon_free_share",
+      "actual_metric": "carbon_free_share",
+      "actual_plan": {
+        "view": "generation_mix",
+        "measures": [
+          "generation_mix.carbon_free_share"
+        ],
+        "dimensions": [
+          "generation_mix.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "generation_mix.ba_code",
+            "operator": "equals",
+            "values": [
+              "CISO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "generation_mix.datetime_utc",
+          "date_range": [
+            "2025-01-01",
+            "2025-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 19,
+        "output_tokens": 132,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q32_carbon_free_pjm_2021",
+      "question": "What was PJM carbon-free share in 2021?",
+      "expected_kind": "query",
+      "actual_kind": "refusal",
+      "expected_metric": "carbon_free_share",
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": false
+      },
+      "passed": false,
+      "failure_mode": "refusal_should_have_answered",
+      "detail": "Not answerable through the governed metrics: Carbon-intensity proxy and emissions data are not governed. The catalog explicitly defers carbon intensity to future work. While the semantic layer does expose carbon_free_share as a generation_mix metric, your question conflates two different concepts: carbon-free generation (which is answerable as renewable + nuclear share) and carbon intensity (which is not). If you are asking for the share of PJM generation from carbon-free sources (renewable + nuclear) in 2021, that is answerable. Please clarify whether you want the carbon-free generation share, or whether you need something else such as emissions or carbon intensity per unit of demand.",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 19,
+        "output_tokens": 150,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q33_imputed_share_ranking_2023",
+      "question": "Rank balancing authorities by imputed demand share in 2023.",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "imputed_demand_share",
+      "actual_metric": "imputed_demand_share",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.imputed_demand_share"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": [
+          {
+            "member": "demand.imputed_demand_share",
+            "direction": "desc"
+          }
+        ]
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 20,
+        "output_tokens": 122,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q34_imputed_share_erco_2024",
+      "question": "What was ERCOT imputed demand share in 2024?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "imputed_demand_share",
+      "actual_metric": "imputed_demand_share",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.imputed_demand_share"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand.ba_code",
+            "operator": "equals",
+            "values": [
+              "ERCO"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2024-01-01",
+            "2024-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 20,
+        "output_tokens": 124,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "q35_imputed_share_pjm_2021",
+      "question": "What was PJM imputed demand share in 2021?",
+      "expected_kind": "query",
+      "actual_kind": "answer",
+      "expected_metric": "imputed_demand_share",
+      "actual_metric": "imputed_demand_share",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.imputed_demand_share"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [
+          {
+            "member": "demand.ba_code",
+            "operator": "equals",
+            "values": [
+              "PJM"
+            ]
+          }
+        ],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2021-01-01",
+            "2021-12-31"
+          ]
+        },
+        "order": []
+      },
+      "checks": {
+        "kind": true,
+        "metric": true,
+        "params": true,
+        "period": true,
+        "result": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 19,
+        "output_tokens": 124,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "r01_carbon_intensity_erco",
+      "question": "What was ERCOT carbon intensity in 2023?",
+      "expected_kind": "refuse",
+      "actual_kind": "refusal",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 18,
+        "output_tokens": 85,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "r02_carbon_intensity_ciso",
+      "question": "What was CISO carbon intensity in 2024?",
+      "expected_kind": "refuse",
+      "actual_kind": "refusal",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 17,
+        "output_tokens": 65,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "r03_prices_erco",
+      "question": "What was the average wholesale electricity price in ERCOT in 2023?",
+      "expected_kind": "refuse",
+      "actual_kind": "refusal",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 22,
+        "output_tokens": 72,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "r04_out_of_scope_ba_nyiso",
+      "question": "What was NYISO total demand in 2023?",
+      "expected_kind": "refuse",
+      "actual_kind": "refusal",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 17,
+        "output_tokens": 70,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "r05_out_of_scope_ba_miso",
+      "question": "What was MISO fossil share in 2022?",
+      "expected_kind": "refuse",
+      "actual_kind": "refusal",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 17,
+        "output_tokens": 63,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "r06_out_of_window_date_2018",
+      "question": "What was PJM total demand in 2018?",
+      "expected_kind": "refuse",
+      "actual_kind": "refusal",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 17,
+        "output_tokens": 40,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "r07_out_of_window_date_after_end",
+      "question": "What was CISO renewable share in 2027?",
+      "expected_kind": "refuse",
+      "actual_kind": "refusal",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 17,
+        "output_tokens": 71,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "r08_weather_normalized",
+      "question": "What was weather-normalized demand growth in ERCOT in 2023?",
+      "expected_kind": "refuse",
+      "actual_kind": "refusal",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 22,
+        "output_tokens": 60,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "r09_forecast",
+      "question": "Forecast ERCOT demand for 2027.",
+      "expected_kind": "refuse",
+      "actual_kind": "refusal",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 17,
+        "output_tokens": 64,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "r10_plant_level_detail",
+      "question": "Which specific gas plants in ERCOT drove growth in 2023?",
+      "expected_kind": "refuse",
+      "actual_kind": "refusal",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 21,
+        "output_tokens": 104,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "c01_ambiguous_region",
+      "question": "Which region had the highest demand in 2023?",
+      "expected_kind": "clarify",
+      "actual_kind": "answer",
+      "expected_metric": null,
+      "actual_metric": "total_demand",
+      "actual_plan": {
+        "view": "demand",
+        "measures": [
+          "demand.total_demand_mwh"
+        ],
+        "dimensions": [
+          "demand.ba_code"
+        ],
+        "filters": [],
+        "time_dimension": {
+          "dimension": "demand.datetime_utc",
+          "date_range": [
+            "2023-01-01",
+            "2023-12-31"
+          ]
+        },
+        "order": [
+          {
+            "member": "demand.total_demand_mwh",
+            "direction": "desc"
+          }
+        ]
+      },
+      "checks": {
+        "kind": false
+      },
+      "passed": false,
+      "failure_mode": "answered_should_have_clarified",
+      "detail": "expected clarification, got answer",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 16,
+        "output_tokens": 121,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "c02_ambiguous_period",
+      "question": "What was ERCOT total demand?",
+      "expected_kind": "clarify",
+      "actual_kind": "clarification",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 14,
+        "output_tokens": 50,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "c03_ambiguous_metric_growth",
+      "question": "How much did PJM grow?",
+      "expected_kind": "clarify",
+      "actual_kind": "clarification",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 7780
+        },
+        "cache_creation_input_tokens": 7780,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "not_available",
+        "input_tokens": 13,
+        "output_tokens": 85,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "c04_ambiguous_metric_share",
+      "question": "What was CISO's share in 2024?",
+      "expected_kind": "clarify",
+      "actual_kind": "clarification",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 17,
+        "output_tokens": 55,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    },
+    {
+      "id": "c05_ambiguous_comparison_basis",
+      "question": "Which balancing authority grew the fastest?",
+      "expected_kind": "clarify",
+      "actual_kind": "clarification",
+      "expected_metric": null,
+      "actual_metric": null,
+      "actual_plan": null,
+      "checks": {
+        "kind": true
+      },
+      "passed": true,
+      "failure_mode": null,
+      "detail": "",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 7780,
+        "inference_geo": "not_available",
+        "input_tokens": 13,
+        "output_tokens": 54,
+        "output_tokens_details": null,
+        "server_tool_use": null,
+        "service_tier": "batch"
+      }
+    }
+  ]
+}
