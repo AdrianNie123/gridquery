@@ -221,6 +221,54 @@ def test_grouping_set_match_with_fully_qualified_dimensions():
     assert "grouping" in detail
 
 
+def test_grouping_by_a_dimension_pinned_to_one_value_is_a_no_op():
+    # Filter ba_code to one BA and also group by ba_code: the grouping adds
+    # a constant label column, so it must compare equal to no grouping.
+    entry = query_entry(
+        checks=Checks(ba_filter=["ERCO"], group_by=[], period=PeriodSpec(years=[2023]))
+    )
+    pin = Filter(member="demand.ba_code", operator="equals", values=["ERCO"])
+    plan = demand_plan(dimensions=["demand.ba_code"], filters=[pin])
+    params_ok, _, detail = check_params(entry, plan)
+    assert params_ok, detail
+
+    # Symmetric: expected grouping includes the pinned dimension while the
+    # plan omits it; still the same slice.
+    entry_grouped = query_entry(
+        checks=Checks(
+            ba_filter=["ERCO"], group_by=["ba_code"], period=PeriodSpec(years=[2023])
+        )
+    )
+    plan_ungrouped = demand_plan(dimensions=[], filters=[pin])
+    params_ok, _, detail = check_params(entry_grouped, plan_ungrouped)
+    assert params_ok, detail
+
+
+def test_grouping_by_an_unpinned_dimension_still_fails():
+    entry = query_entry(
+        checks=Checks(ba_filter=["ERCO"], group_by=[], period=PeriodSpec(years=[2023]))
+    )
+    pin = Filter(member="demand.ba_code", operator="equals", values=["ERCO"])
+    # is_imputed is grouped but not pinned by any filter: not equivalent.
+    plan = demand_plan(dimensions=["demand.is_imputed"], filters=[pin])
+    params_ok, _, detail = check_params(entry, plan)
+    assert not params_ok
+    assert "grouping" in detail
+
+
+def test_multi_value_equals_filter_does_not_pin_the_grouping():
+    entry = query_entry(
+        checks=Checks(
+            ba_filter=["ERCO", "PJM"], group_by=[], period=PeriodSpec(years=[2023])
+        )
+    )
+    two_bas = Filter(member="demand.ba_code", operator="equals", values=["ERCO", "PJM"])
+    plan = demand_plan(dimensions=["demand.ba_code"], filters=[two_bas])
+    params_ok, _, detail = check_params(entry, plan)
+    assert not params_ok
+    assert "grouping" in detail
+
+
 def test_missing_expected_measure_fails():
     plan = demand_plan(measures=["demand.peak_demand_mwh"])
     params_ok, _, detail = check_params(query_entry(), plan)

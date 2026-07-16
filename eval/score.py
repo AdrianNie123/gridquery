@@ -178,10 +178,21 @@ def check_params(entry: GoldenEntry, plan: QueryPlan) -> tuple[bool, bool, str]:
         if actual_norm != expected_norm:
             problems.append(f"ba filter {sorted(actual_bas)} != {sorted(expected_bas)}")
 
-    actual_groups = {_short(d) for d in plan.dimensions}
-    if actual_groups != set(checks.group_by):
+    # Grouping by a dimension an equals-filter pins to a single value is a
+    # no-op label column (same aggregation, one constant key), so it is
+    # dropped from both sides before comparing, like the all-three-BA
+    # filter above. A pinned-but-wrong filter value cannot hide here: the
+    # ba-filter check and the result check both catch it independently.
+    pinned = {
+        _short(f.member)
+        for f in plan.filters
+        if f.operator == "equals" and len(f.values) == 1
+    }
+    actual_groups = {_short(d) for d in plan.dimensions} - pinned
+    expected_groups = set(checks.group_by) - pinned
+    if actual_groups != expected_groups:
         problems.append(
-            f"grouping {sorted(actual_groups)} != {sorted(checks.group_by)}"
+            f"grouping {sorted(actual_groups)} != {sorted(expected_groups)}"
         )
 
     period_ok = canonical_period(plan) == expected_period(checks.period)
