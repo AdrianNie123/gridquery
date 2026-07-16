@@ -4,6 +4,16 @@ GridQuery is a small governed data product over U.S. hourly grid data.
 
 The core idea is simple: do not let an LLM invent metrics or write free-form SQL over raw tables. Instead, define trusted metrics once in a semantic layer, then let the LLM only select and parameterize those metrics.
 
+## How to run in 3 commands
+
+```bash
+uv sync
+make cube-up
+make app
+```
+
+Then open the local Streamlit URL printed in your terminal.
+
 ## What this project is
 
 This project implements an end-to-end analytics architecture:
@@ -67,9 +77,9 @@ From `docs/ROADMAP.md`:
 - Phase 1: complete
 - Phase 2: complete
 - Phase 3: complete
-- Phase 4: built and verified, pending gate review
-- Phase 5: pending (evaluation harness)
-- Phase 6: pending (Streamlit front end)
+- Phase 4: complete (natural-language interface)
+- Phase 5: complete (evaluation harness + report artifact)
+- Phase 6: complete (Streamlit front end)
 
 ## Dataset and scope
 
@@ -80,12 +90,31 @@ From `docs/ROADMAP.md`:
 
 Locked metric definitions and data handling decisions are tracked in `docs/ROADMAP.md` and `PRD.md`.
 
-## Honest limitations
+## Streamlit pages
+
+- Home (NL query)
+- Demand growth leaderboard (annual growth metrics)
+- Generation mix (share metrics)
+- Eval results
+- Demand explorer (unit totals + time granularity)
+- Generation explorer (unit totals + time granularity)
+
+### Screenshots
+
+![Home page](docs/screenshots/home.png)
+![Demand growth leaderboard](docs/screenshots/demand_growth_leaderboard.png)
+![Generation mix](docs/screenshots/generation_mix.png)
+![Eval results](docs/screenshots/eval_results.png)
+![Demand explorer](docs/screenshots/demand_explorer.png)
+![Generation explorer](docs/screenshots/generation_explorer.png)
+
+## Known limitations (v1)
 
 - This is a local, single-user build, not a production service.
 - Weather normalization is out of scope for v1.
 - Carbon-intensity proxy is deferred to future work.
 - The LLM can still choose the wrong governed metric; this is measured in the eval harness phase, not assumed away.
+- The demand growth page is intentionally annual-only; sub-annual exploration lives on the dedicated demand and generation explorer pages.
 
 ## Running the project
 

@@ -11,16 +11,19 @@ import anthropic
 import requests
 import streamlit as st
 
-from app.governed import (
-    CUBE_SETUP_HINT,
-    cached_views,
-    caveat_notes,
-    humanize_rows,
-    parameters_line,
-    refresh_views,
-)
+import app.governed as governed
 from nl.executor import CubeQueryError
 from nl.interface import ask
+
+CUBE_SETUP_HINT = governed.CUBE_SETUP_HINT
+cached_views = governed.cached_views
+humanize_rows = governed.humanize_rows
+refresh_views = governed.refresh_views
+# Keep Home resilient if a stale runtime loads an older app.governed.
+parameters_line = getattr(
+    governed, "parameters_line", lambda _plan: "parameters unavailable"
+)
+caveat_notes = getattr(governed, "caveat_notes", lambda _plan, _rows: [])
 
 st.set_page_config(page_title="GridQuery", page_icon="⚡")
 st.title("GridQuery")
@@ -29,6 +32,19 @@ st.caption(
     "onward). Answers come only from governed Cube metrics; questions "
     "outside that surface are refused or clarified by design."
 )
+with st.expander("Query legend and tips"):
+    st.markdown(
+        "- **Supported regions:** `PJM`, `ERCO`, `CISO`\n"
+        "- **Supported window:** `2019` through partial `2026`\n"
+        "- **Question patterns that work best:**\n"
+        "  - `Which balancing authority had the highest total demand in 2023?`\n"
+        "  - `What was ERCOT peak hourly demand in 2024?`\n"
+        "  - `What was CISO renewable share in 2025?`\n"
+        "  - `Rank balancing authorities by fossil share in 2023.`\n"
+        "  - `What was PJM imputed demand share in 2021?`\n"
+        "- **If your question is ambiguous,** the app will ask for clarification.\n"
+        "- **Not supported (will refuse):** carbon intensity, weather normalization, prices/LMP, forecasts, plant-level detail, or BAs outside the governed set."
+    )
 
 
 @st.cache_resource
