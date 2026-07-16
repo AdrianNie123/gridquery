@@ -1,0 +1,321 @@
+{
+  "metadata": {
+    "entries": 35,
+    "git_commit": "a995a52",
+    "pinned_at": "2026-07-16T17:20:16Z"
+  },
+  "results": {
+    "q01_total_demand_ranking_2023": [
+      {
+        "demand.ba_code": "PJM",
+        "demand.total_demand_mwh": "784808622.53125"
+      },
+      {
+        "demand.ba_code": "ERCO",
+        "demand.total_demand_mwh": "446793938"
+      },
+      {
+        "demand.ba_code": "CISO",
+        "demand.total_demand_mwh": "218185644.78222656"
+      }
+    ],
+    "q02_total_demand_erco_2022": [
+      {
+        "demand.total_demand_mwh": "430634261"
+      }
+    ],
+    "q03_total_demand_pjm_2019": [
+      {
+        "demand.total_demand_mwh": "800230117.296875"
+      }
+    ],
+    "q04_total_demand_ciso_2024": [
+      {
+        "demand.total_demand_mwh": "223958725.19433594"
+      }
+    ],
+    "q05_peak_demand_ranking_2023": [
+      {
+        "demand.ba_code": "PJM",
+        "demand.peak_demand_mwh": "147605"
+      },
+      {
+        "demand.ba_code": "ERCO",
+        "demand.peak_demand_mwh": "85432"
+      },
+      {
+        "demand.ba_code": "CISO",
+        "demand.peak_demand_mwh": "44007"
+      }
+    ],
+    "q06_peak_demand_erco_2024": [
+      {
+        "demand.peak_demand_mwh": "85544"
+      }
+    ],
+    "q07_peak_demand_ciso_2021": [
+      {
+        "demand.peak_demand_mwh": "43615"
+      }
+    ],
+    "q08_average_demand_pjm_2023": [
+      {
+        "demand.average_demand_mwh": "89590.02540311073"
+      }
+    ],
+    "q09_average_demand_erco_2020": [
+      {
+        "demand.average_demand_mwh": "43370.13433582188"
+      }
+    ],
+    "q10_yoy_growth_erco_2023": [
+      {
+        "demand_growth.demand_yoy_growth": "0.03752529341830524"
+      }
+    ],
+    "q11_yoy_growth_ciso_2022": [
+      {
+        "demand_growth.demand_yoy_growth": "0.02047973172309825"
+      }
+    ],
+    "q12_yoy_growth_pjm_2024": [
+      {
+        "demand_growth.demand_yoy_growth": "0.038545018231954886"
+      }
+    ],
+    "q13_yoy_growth_partial_2026_erco": [
+      {
+        "demand_growth.demand_yoy_growth": null
+      }
+    ],
+    "q14_cagr_erco_2019_2024": [
+      {
+        "demand_growth.demand_cagr": "0.0385779204908423"
+      }
+    ],
+    "q15_cagr_pjm_2020_2025": [
+      {
+        "demand_growth.demand_cagr": "0.01821565039045847"
+      }
+    ],
+    "q16_cagr_ciso_2019_2025": [
+      {
+        "demand_growth.demand_cagr": "0.00738101504441957"
+      }
+    ],
+    "q17_generation_by_fuel_erco_2023": [
+      {
+        "generation_mix.generation_mwh": "201422950",
+        "generation_mix.unified_fuel_category": "gas"
+      },
+      {
+        "generation_mix.generation_mwh": "108016960",
+        "generation_mix.unified_fuel_category": "wind"
+      },
+      {
+        "generation_mix.generation_mwh": "62281812",
+        "generation_mix.unified_fuel_category": "coal"
+      },
+      {
+        "generation_mix.generation_mwh": "40909065",
+        "generation_mix.unified_fuel_category": "nuclear"
+      },
+      {
+        "generation_mix.generation_mwh": "31867127",
+        "generation_mix.unified_fuel_category": "solar"
+      },
+      {
+        "generation_mix.generation_mwh": "1146722",
+        "generation_mix.unified_fuel_category": "other"
+      },
+      {
+        "generation_mix.generation_mwh": "296866",
+        "generation_mix.unified_fuel_category": "hydro"
+      }
+    ],
+    "q18_generation_by_fuel_ciso_2024_break": [
+      {
+        "generation_mix.generation_mwh": "85391715",
+        "generation_mix.unified_fuel_category": "gas"
+      },
+      {
+        "generation_mix.generation_mwh": "44729360",
+        "generation_mix.unified_fuel_category": "solar"
+      },
+      {
+        "generation_mix.generation_mwh": "22762368",
+        "generation_mix.unified_fuel_category": "hydro"
+      },
+      {
+        "generation_mix.generation_mwh": "20044281",
+        "generation_mix.unified_fuel_category": "wind"
+      },
+      {
+        "generation_mix.generation_mwh": "18349765",
+        "generation_mix.unified_fuel_category": "nuclear"
+      },
+      {
+        "generation_mix.generation_mwh": "519341",
+        "generation_mix.unified_fuel_category": "oil"
+      },
+      {
+        "generation_mix.generation_mwh": "-699",
+        "generation_mix.unified_fuel_category": "coal"
+      },
+      {
+        "generation_mix.generation_mwh": "-1153694",
+        "generation_mix.unified_fuel_category": "other"
+      }
+    ],
+    "q19_generation_by_fuel_pjm_2022": [
+      {
+        "generation_mix.generation_mwh": "332353166",
+        "generation_mix.unified_fuel_category": "gas"
+      },
+      {
+        "generation_mix.generation_mwh": "272279465",
+        "generation_mix.unified_fuel_category": "nuclear"
+      },
+      {
+        "generation_mix.generation_mwh": "167401873",
+        "generation_mix.unified_fuel_category": "coal"
+      },
+      {
+        "generation_mix.generation_mwh": "32212838",
+        "generation_mix.unified_fuel_category": "wind"
+      },
+      {
+        "generation_mix.generation_mwh": "16022698",
+        "generation_mix.unified_fuel_category": "hydro"
+      },
+      {
+        "generation_mix.generation_mwh": "10851342",
+        "generation_mix.unified_fuel_category": "other"
+      },
+      {
+        "generation_mix.generation_mwh": "7159580",
+        "generation_mix.unified_fuel_category": "solar"
+      },
+      {
+        "generation_mix.generation_mwh": "2801459",
+        "generation_mix.unified_fuel_category": "oil"
+      }
+    ],
+    "q20_mix_share_coal_pjm_2023": [
+      {
+        "generation_mix.coal_share": "0.14690871883132411"
+      }
+    ],
+    "q21_mix_share_gas_erco_2023": [
+      {
+        "generation_mix.gas_share": "0.45168020714968127"
+      }
+    ],
+    "q22_mix_share_solar_ciso_2025": [
+      {
+        "generation_mix.solar_share": "0.26656180681190783"
+      }
+    ],
+    "q23_mix_share_hydro_ciso_2024": [
+      {
+        "generation_mix.hydro_share": "0.11939822191844936"
+      }
+    ],
+    "q24_renewable_share_ranking_2023": [
+      {
+        "generation_mix.ba_code": "CISO",
+        "generation_mix.renewable_share": "0.42383668886246817"
+      },
+      {
+        "generation_mix.ba_code": "ERCO",
+        "generation_mix.renewable_share": "0.3143482998808216"
+      },
+      {
+        "generation_mix.ba_code": "PJM",
+        "generation_mix.renewable_share": "0.06560272662511417"
+      }
+    ],
+    "q25_renewable_share_erco_2024": [
+      {
+        "generation_mix.renewable_share": "0.3447919238021876"
+      }
+    ],
+    "q26_renewable_share_ciso_2025": [
+      {
+        "generation_mix.renewable_share": "0.4888643804811221"
+      }
+    ],
+    "q27_fossil_share_ranking_2023": [
+      {
+        "generation_mix.ba_code": "ERCO",
+        "generation_mix.fossil_share": "0.5913438440183574"
+      },
+      {
+        "generation_mix.ba_code": "PJM",
+        "generation_mix.fossil_share": "0.5883381056124345"
+      },
+      {
+        "generation_mix.ba_code": "CISO",
+        "generation_mix.fossil_share": "0.47997308943487443"
+      }
+    ],
+    "q28_fossil_share_erco_2023": [
+      {
+        "generation_mix.fossil_share": "0.5913438440183574"
+      }
+    ],
+    "q29_fossil_share_pjm_2022": [
+      {
+        "generation_mix.fossil_share": "0.5975115939321243"
+      }
+    ],
+    "q30_carbon_free_ranking_2023": [
+      {
+        "generation_mix.ba_code": "CISO",
+        "generation_mix.carbon_free_share": "0.520313997389442"
+      },
+      {
+        "generation_mix.ba_code": "ERCO",
+        "generation_mix.carbon_free_share": "0.4060846931443488"
+      },
+      {
+        "generation_mix.ba_code": "PJM",
+        "generation_mix.carbon_free_share": "0.39811874290413524"
+      }
+    ],
+    "q31_carbon_free_ciso_2025": [
+      {
+        "generation_mix.carbon_free_share": "0.5833544102932966"
+      }
+    ],
+    "q32_carbon_free_pjm_2021": [
+      {
+        "generation_mix.carbon_free_share": "0.38886101668469314"
+      }
+    ],
+    "q33_imputed_share_ranking_2023": [
+      {
+        "demand.ba_code": "PJM",
+        "demand.imputed_demand_share": "0.0028538812785388126"
+      },
+      {
+        "demand.ba_code": "CISO",
+        "demand.imputed_demand_share": "0.00022831050228310502"
+      },
+      {
+        "demand.ba_code": "ERCO",
+        "demand.imputed_demand_share": "0"
+      }
+    ],
+    "q34_imputed_share_erco_2024": [
+      {
+        "demand.imputed_demand_share": "0"
+      }
+    ],
+    "q35_imputed_share_pjm_2021": [
+      {
+        "demand.imputed_demand_share": "0.00034246575342465754"
+      }
+    ]
+  }
+}

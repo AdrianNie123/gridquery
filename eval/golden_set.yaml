@@ -1,0 +1,793 @@
+- id: q01_total_demand_ranking_2023
+  question: "Which balancing authority had the highest total demand in 2023?"
+  kind: query
+  expected_metric: total_demand
+  golden_plan:
+    view: demand
+    measures: [demand.total_demand_mwh]
+    dimensions: [demand.ba_code]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2023-01-01", "2023-12-31"]
+    order:
+      - member: demand.total_demand_mwh
+        direction: desc
+  checks:
+    ba_filter: []
+    group_by: [ba_code]
+    period:
+      years: [2023]
+    ordered: true
+  notes: "Anchor question via NL path."
+
+- id: q02_total_demand_erco_2022
+  question: "What was ERCOT total demand in 2022?"
+  kind: query
+  expected_metric: total_demand
+  golden_plan:
+    view: demand
+    measures: [demand.total_demand_mwh]
+    filters:
+      - member: demand.ba_code
+        operator: equals
+        values: [ERCO]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2022-01-01", "2022-12-31"]
+  checks:
+    ba_filter: [ERCO]
+    group_by: []
+    period:
+      years: [2022]
+
+- id: q03_total_demand_pjm_2019
+  question: "How much total demand did PJM have in 2019?"
+  kind: query
+  expected_metric: total_demand
+  golden_plan:
+    view: demand
+    measures: [demand.total_demand_mwh]
+    filters:
+      - member: demand.ba_code
+        operator: equals
+        values: [PJM]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2019-01-01", "2019-12-31"]
+  checks:
+    ba_filter: [PJM]
+    group_by: []
+    period:
+      years: [2019]
+
+- id: q04_total_demand_ciso_2024
+  question: "What was CISO total demand in 2024?"
+  kind: query
+  expected_metric: total_demand
+  golden_plan:
+    view: demand
+    measures: [demand.total_demand_mwh]
+    filters:
+      - member: demand.ba_code
+        operator: equals
+        values: [CISO]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2024-01-01", "2024-12-31"]
+  checks:
+    ba_filter: [CISO]
+    group_by: []
+    period:
+      years: [2024]
+
+- id: q05_peak_demand_ranking_2023
+  question: "Rank balancing authorities by peak demand in 2023."
+  kind: query
+  expected_metric: peak_demand
+  golden_plan:
+    view: demand
+    measures: [demand.peak_demand_mwh]
+    dimensions: [demand.ba_code]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2023-01-01", "2023-12-31"]
+    order:
+      - member: demand.peak_demand_mwh
+        direction: desc
+  checks:
+    ba_filter: []
+    group_by: [ba_code]
+    period:
+      years: [2023]
+    ordered: true
+
+- id: q06_peak_demand_erco_2024
+  question: "What was ERCOT peak hourly demand in 2024?"
+  kind: query
+  expected_metric: peak_demand
+  golden_plan:
+    view: demand
+    measures: [demand.peak_demand_mwh]
+    filters:
+      - member: demand.ba_code
+        operator: equals
+        values: [ERCO]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2024-01-01", "2024-12-31"]
+  checks:
+    ba_filter: [ERCO]
+    group_by: []
+    period:
+      years: [2024]
+
+- id: q07_peak_demand_ciso_2021
+  question: "What was CISO peak hourly demand in 2021?"
+  kind: query
+  expected_metric: peak_demand
+  golden_plan:
+    view: demand
+    measures: [demand.peak_demand_mwh]
+    filters:
+      - member: demand.ba_code
+        operator: equals
+        values: [CISO]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2021-01-01", "2021-12-31"]
+  checks:
+    ba_filter: [CISO]
+    group_by: []
+    period:
+      years: [2021]
+
+- id: q08_average_demand_pjm_2023
+  question: "What was PJM average hourly demand in 2023?"
+  kind: query
+  expected_metric: average_demand
+  golden_plan:
+    view: demand
+    measures: [demand.average_demand_mwh]
+    filters:
+      - member: demand.ba_code
+        operator: equals
+        values: [PJM]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2023-01-01", "2023-12-31"]
+  checks:
+    ba_filter: [PJM]
+    group_by: []
+    period:
+      years: [2023]
+
+- id: q09_average_demand_erco_2020
+  question: "What was ERCOT average hourly demand in 2020?"
+  kind: query
+  expected_metric: average_demand
+  golden_plan:
+    view: demand
+    measures: [demand.average_demand_mwh]
+    filters:
+      - member: demand.ba_code
+        operator: equals
+        values: [ERCO]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2020-01-01", "2020-12-31"]
+  checks:
+    ba_filter: [ERCO]
+    group_by: []
+    period:
+      years: [2020]
+
+- id: q10_yoy_growth_erco_2023
+  question: "What was ERCOT demand year-over-year growth for 2023?"
+  kind: query
+  expected_metric: demand_yoy_growth
+  golden_plan:
+    view: demand_growth
+    measures: [demand_growth.demand_yoy_growth]
+    filters:
+      - member: demand_growth.ba_code
+        operator: equals
+        values: [ERCO]
+      - member: demand_growth.year
+        operator: equals
+        values: ["2023"]
+  checks:
+    ba_filter: [ERCO]
+    group_by: []
+    period:
+      years: [2023]
+
+- id: q11_yoy_growth_ciso_2022
+  question: "What was CISO demand year-over-year growth for 2022?"
+  kind: query
+  expected_metric: demand_yoy_growth
+  golden_plan:
+    view: demand_growth
+    measures: [demand_growth.demand_yoy_growth]
+    filters:
+      - member: demand_growth.ba_code
+        operator: equals
+        values: [CISO]
+      - member: demand_growth.year
+        operator: equals
+        values: ["2022"]
+  checks:
+    ba_filter: [CISO]
+    group_by: []
+    period:
+      years: [2022]
+
+- id: q12_yoy_growth_pjm_2024
+  question: "What was PJM demand year-over-year growth for 2024?"
+  kind: query
+  expected_metric: demand_yoy_growth
+  golden_plan:
+    view: demand_growth
+    measures: [demand_growth.demand_yoy_growth]
+    filters:
+      - member: demand_growth.ba_code
+        operator: equals
+        values: [PJM]
+      - member: demand_growth.year
+        operator: equals
+        values: ["2024"]
+  checks:
+    ba_filter: [PJM]
+    group_by: []
+    period:
+      years: [2024]
+
+- id: q13_yoy_growth_partial_2026_erco
+  question: "What is ERCOT demand year-over-year growth for 2026?"
+  kind: query
+  expected_metric: demand_yoy_growth
+  golden_plan:
+    view: demand_growth
+    measures: [demand_growth.demand_yoy_growth]
+    filters:
+      - member: demand_growth.ba_code
+        operator: equals
+        values: [ERCO]
+      - member: demand_growth.year
+        operator: equals
+        values: ["2026"]
+  checks:
+    ba_filter: [ERCO]
+    group_by: []
+    period:
+      years: [2026]
+  notes: "Partial-year null-by-design case."
+
+- id: q14_cagr_erco_2019_2024
+  question: "What was ERCOT demand CAGR from 2019 to 2024?"
+  kind: query
+  expected_metric: demand_cagr
+  golden_plan:
+    view: demand_growth
+    measures: [demand_growth.demand_cagr]
+    filters:
+      - member: demand_growth.ba_code
+        operator: equals
+        values: [ERCO]
+      - member: demand_growth.year
+        operator: gte
+        values: ["2019"]
+      - member: demand_growth.year
+        operator: lte
+        values: ["2024"]
+  checks:
+    ba_filter: [ERCO]
+    group_by: []
+    period:
+      years: [2019, 2020, 2021, 2022, 2023, 2024]
+
+- id: q15_cagr_pjm_2020_2025
+  question: "What was PJM demand CAGR from 2020 to 2025?"
+  kind: query
+  expected_metric: demand_cagr
+  golden_plan:
+    view: demand_growth
+    measures: [demand_growth.demand_cagr]
+    filters:
+      - member: demand_growth.ba_code
+        operator: equals
+        values: [PJM]
+      - member: demand_growth.year
+        operator: gte
+        values: ["2020"]
+      - member: demand_growth.year
+        operator: lte
+        values: ["2025"]
+  checks:
+    ba_filter: [PJM]
+    group_by: []
+    period:
+      years: [2020, 2021, 2022, 2023, 2024, 2025]
+
+- id: q16_cagr_ciso_2019_2025
+  question: "What was CISO demand CAGR from 2019 to 2025?"
+  kind: query
+  expected_metric: demand_cagr
+  golden_plan:
+    view: demand_growth
+    measures: [demand_growth.demand_cagr]
+    filters:
+      - member: demand_growth.ba_code
+        operator: equals
+        values: [CISO]
+      - member: demand_growth.year
+        operator: gte
+        values: ["2019"]
+      - member: demand_growth.year
+        operator: lte
+        values: ["2025"]
+  checks:
+    ba_filter: [CISO]
+    group_by: []
+    period:
+      years: [2019, 2020, 2021, 2022, 2023, 2024, 2025]
+
+- id: q17_generation_by_fuel_erco_2023
+  question: "Break down ERCOT generation by fuel in 2023."
+  kind: query
+  expected_metric: generation_by_fuel
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.generation_mwh]
+    dimensions: [generation_mix.unified_fuel_category]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [ERCO]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2023-01-01", "2023-12-31"]
+    order:
+      - member: generation_mix.generation_mwh
+        direction: desc
+  checks:
+    ba_filter: [ERCO]
+    group_by: [unified_fuel_category]
+    period:
+      years: [2023]
+
+- id: q18_generation_by_fuel_ciso_2024_break
+  question: "Break down CISO generation by fuel in 2024."
+  kind: query
+  expected_metric: generation_by_fuel
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.generation_mwh]
+    dimensions: [generation_mix.unified_fuel_category]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [CISO]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2024-01-01", "2024-12-31"]
+    order:
+      - member: generation_mix.generation_mwh
+        direction: desc
+  checks:
+    ba_filter: [CISO]
+    group_by: [unified_fuel_category]
+    period:
+      years: [2024]
+  notes: "Window spans the 2024-07-01 series break."
+
+- id: q19_generation_by_fuel_pjm_2022
+  question: "Break down PJM generation by fuel in 2022."
+  kind: query
+  expected_metric: generation_by_fuel
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.generation_mwh]
+    dimensions: [generation_mix.unified_fuel_category]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [PJM]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2022-01-01", "2022-12-31"]
+    order:
+      - member: generation_mix.generation_mwh
+        direction: desc
+  checks:
+    ba_filter: [PJM]
+    group_by: [unified_fuel_category]
+    period:
+      years: [2022]
+
+- id: q20_mix_share_coal_pjm_2023
+  question: "What was coal's generation mix share in PJM in 2023?"
+  kind: query
+  expected_metric: generation_mix_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.coal_share]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [PJM]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2023-01-01", "2023-12-31"]
+  checks:
+    ba_filter: [PJM]
+    group_by: []
+    period:
+      years: [2023]
+    metric_aliases: [coal_share]
+
+- id: q21_mix_share_gas_erco_2023
+  question: "What was natural gas share of generation in ERCOT in 2023?"
+  kind: query
+  expected_metric: generation_mix_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.gas_share]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [ERCO]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2023-01-01", "2023-12-31"]
+  checks:
+    ba_filter: [ERCO]
+    group_by: []
+    period:
+      years: [2023]
+    metric_aliases: [gas_share]
+
+- id: q22_mix_share_solar_ciso_2025
+  question: "What was solar share of generation in CISO in 2025?"
+  kind: query
+  expected_metric: generation_mix_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.solar_share]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [CISO]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2025-01-01", "2025-12-31"]
+  checks:
+    ba_filter: [CISO]
+    group_by: []
+    period:
+      years: [2025]
+    metric_aliases: [solar_share]
+
+- id: q23_mix_share_hydro_ciso_2024
+  question: "What was hydro share of generation in CISO in 2024?"
+  kind: query
+  expected_metric: generation_mix_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.hydro_share]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [CISO]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2024-01-01", "2024-12-31"]
+  checks:
+    ba_filter: [CISO]
+    group_by: []
+    period:
+      years: [2024]
+    metric_aliases: [hydro_share]
+
+- id: q24_renewable_share_ranking_2023
+  question: "Rank balancing authorities by renewable share in 2023."
+  kind: query
+  expected_metric: renewable_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.renewable_share]
+    dimensions: [generation_mix.ba_code]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2023-01-01", "2023-12-31"]
+    order:
+      - member: generation_mix.renewable_share
+        direction: desc
+  checks:
+    ba_filter: []
+    group_by: [ba_code]
+    period:
+      years: [2023]
+    ordered: true
+
+- id: q25_renewable_share_erco_2024
+  question: "What was ERCOT renewable share in 2024?"
+  kind: query
+  expected_metric: renewable_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.renewable_share]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [ERCO]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2024-01-01", "2024-12-31"]
+  checks:
+    ba_filter: [ERCO]
+    group_by: []
+    period:
+      years: [2024]
+
+- id: q26_renewable_share_ciso_2025
+  question: "What was CISO renewable share in 2025?"
+  kind: query
+  expected_metric: renewable_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.renewable_share]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [CISO]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2025-01-01", "2025-12-31"]
+  checks:
+    ba_filter: [CISO]
+    group_by: []
+    period:
+      years: [2025]
+
+- id: q27_fossil_share_ranking_2023
+  question: "Rank balancing authorities by fossil share in 2023."
+  kind: query
+  expected_metric: fossil_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.fossil_share]
+    dimensions: [generation_mix.ba_code]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2023-01-01", "2023-12-31"]
+    order:
+      - member: generation_mix.fossil_share
+        direction: desc
+  checks:
+    ba_filter: []
+    group_by: [ba_code]
+    period:
+      years: [2023]
+    ordered: true
+
+- id: q28_fossil_share_erco_2023
+  question: "What was ERCOT fossil share in 2023?"
+  kind: query
+  expected_metric: fossil_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.fossil_share]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [ERCO]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2023-01-01", "2023-12-31"]
+  checks:
+    ba_filter: [ERCO]
+    group_by: []
+    period:
+      years: [2023]
+
+- id: q29_fossil_share_pjm_2022
+  question: "What was PJM fossil share in 2022?"
+  kind: query
+  expected_metric: fossil_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.fossil_share]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [PJM]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2022-01-01", "2022-12-31"]
+  checks:
+    ba_filter: [PJM]
+    group_by: []
+    period:
+      years: [2022]
+
+- id: q30_carbon_free_ranking_2023
+  question: "Rank balancing authorities by carbon-free share in 2023."
+  kind: query
+  expected_metric: carbon_free_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.carbon_free_share]
+    dimensions: [generation_mix.ba_code]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2023-01-01", "2023-12-31"]
+    order:
+      - member: generation_mix.carbon_free_share
+        direction: desc
+  checks:
+    ba_filter: []
+    group_by: [ba_code]
+    period:
+      years: [2023]
+    ordered: true
+
+- id: q31_carbon_free_ciso_2025
+  question: "What was CISO carbon-free share in 2025?"
+  kind: query
+  expected_metric: carbon_free_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.carbon_free_share]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [CISO]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2025-01-01", "2025-12-31"]
+  checks:
+    ba_filter: [CISO]
+    group_by: []
+    period:
+      years: [2025]
+
+- id: q32_carbon_free_pjm_2021
+  question: "What was PJM carbon-free share in 2021?"
+  kind: query
+  expected_metric: carbon_free_share
+  golden_plan:
+    view: generation_mix
+    measures: [generation_mix.carbon_free_share]
+    filters:
+      - member: generation_mix.ba_code
+        operator: equals
+        values: [PJM]
+    time_dimension:
+      dimension: generation_mix.datetime_utc
+      date_range: ["2021-01-01", "2021-12-31"]
+  checks:
+    ba_filter: [PJM]
+    group_by: []
+    period:
+      years: [2021]
+
+- id: q33_imputed_share_ranking_2023
+  question: "Rank balancing authorities by imputed demand share in 2023."
+  kind: query
+  expected_metric: imputed_demand_share
+  golden_plan:
+    view: demand
+    measures: [demand.imputed_demand_share]
+    dimensions: [demand.ba_code]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2023-01-01", "2023-12-31"]
+    order:
+      - member: demand.imputed_demand_share
+        direction: desc
+  checks:
+    ba_filter: []
+    group_by: [ba_code]
+    period:
+      years: [2023]
+    ordered: true
+
+- id: q34_imputed_share_erco_2024
+  question: "What was ERCOT imputed demand share in 2024?"
+  kind: query
+  expected_metric: imputed_demand_share
+  golden_plan:
+    view: demand
+    measures: [demand.imputed_demand_share]
+    filters:
+      - member: demand.ba_code
+        operator: equals
+        values: [ERCO]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2024-01-01", "2024-12-31"]
+  checks:
+    ba_filter: [ERCO]
+    group_by: []
+    period:
+      years: [2024]
+
+- id: q35_imputed_share_pjm_2021
+  question: "What was PJM imputed demand share in 2021?"
+  kind: query
+  expected_metric: imputed_demand_share
+  golden_plan:
+    view: demand
+    measures: [demand.imputed_demand_share]
+    filters:
+      - member: demand.ba_code
+        operator: equals
+        values: [PJM]
+    time_dimension:
+      dimension: demand.datetime_utc
+      date_range: ["2021-01-01", "2021-12-31"]
+  checks:
+    ba_filter: [PJM]
+    group_by: []
+    period:
+      years: [2021]
+
+- id: r01_carbon_intensity_erco
+  question: "What was ERCOT carbon intensity in 2023?"
+  kind: refuse
+
+- id: r02_carbon_intensity_ciso
+  question: "What was CISO carbon intensity in 2024?"
+  kind: refuse
+
+- id: r03_prices_erco
+  question: "What was the average wholesale electricity price in ERCOT in 2023?"
+  kind: refuse
+
+- id: r04_out_of_scope_ba_nyiso
+  question: "What was NYISO total demand in 2023?"
+  kind: refuse
+
+- id: r05_out_of_scope_ba_miso
+  question: "What was MISO fossil share in 2022?"
+  kind: refuse
+
+- id: r06_out_of_window_date_2018
+  question: "What was PJM total demand in 2018?"
+  kind: refuse
+
+- id: r07_out_of_window_date_after_end
+  question: "What was CISO renewable share in 2027?"
+  kind: refuse
+
+- id: r08_weather_normalized
+  question: "What was weather-normalized demand growth in ERCOT in 2023?"
+  kind: refuse
+
+- id: r09_forecast
+  question: "Forecast ERCOT demand for 2027."
+  kind: refuse
+
+- id: r10_plant_level_detail
+  question: "Which specific gas plants in ERCOT drove growth in 2023?"
+  kind: refuse
+
+- id: c01_ambiguous_region
+  question: "Which region had the highest demand in 2023?"
+  kind: clarify
+
+- id: c02_ambiguous_period
+  question: "What was ERCOT total demand?"
+  kind: clarify
+
+- id: c03_ambiguous_metric_growth
+  question: "How much did PJM grow?"
+  kind: clarify
+
+- id: c04_ambiguous_metric_share
+  question: "What was CISO's share in 2024?"
+  kind: clarify
+
+- id: c05_ambiguous_comparison_basis
+  question: "Which balancing authority grew the fastest?"
+  kind: clarify
