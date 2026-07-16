@@ -1,6 +1,6 @@
 # GridQuery task runner.
 
-.PHONY: land profile build dbt-test cube-up cube-down cube-test ask nl-test eval eval-pin eval-score eval-report eval-test
+.PHONY: land profile build dbt-test cube-up cube-down cube-test ask nl-test eval eval-pin eval-score eval-report eval-test app
 
 DBT_FLAGS := --project-dir transform --profiles-dir transform
 
@@ -59,3 +59,9 @@ eval-report:
 # Run the eval-harness tests (offline, no API key needed).
 eval-test:
 	uv run pytest eval/tests -v
+
+# Launch the Streamlit front end (needs Cube running and ANTHROPIC_API_KEY in .env).
+# PYTHONPATH=. because the repo is not an installed package (same reason as
+# the pytest pythonpath setting): the pages import nl/ from the repo root.
+app:
+	PYTHONPATH=. uv run streamlit run app/Home.py
