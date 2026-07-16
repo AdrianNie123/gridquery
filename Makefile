@@ -1,6 +1,6 @@
 # GridQuery task runner.
 
-.PHONY: land profile build dbt-test cube-up cube-down cube-test ask nl-test eval eval-pin eval-score eval-report eval-test app
+.PHONY: land profile build dbt-test cube-up cube-down cube-test ask nl-test eval eval-pin eval-score eval-report eval-test app app-test
 
 DBT_FLAGS := --project-dir transform --profiles-dir transform
 
@@ -65,3 +65,7 @@ eval-test:
 # the pytest pythonpath setting): the pages import nl/ from the repo root.
 app:
 	PYTHONPATH=. uv run streamlit run app/Home.py
+
+# Run the front-end smoke tests (offline: no API key, no Cube).
+app-test:
+	uv run pytest app/tests -v

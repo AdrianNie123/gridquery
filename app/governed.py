@@ -8,7 +8,7 @@ but Cube result rows (integrity rule 1).
 
 import streamlit as st
 
-from nl.catalog import fetch_meta, governed_views
+from nl.catalog import CAVEATS, SERIES_BREAK_DATE, fetch_meta, governed_views
 from nl.executor import execute_plan
 from nl.schema import QueryPlan
 from nl.validator import validate_plan
@@ -75,3 +75,47 @@ def humanize_rows(rows: list[dict]) -> list[dict]:
     Nulls stay null so absence-of-data remains visible.
     """
     return [{short(k): _display_value(k, v) for k, v in row.items()} for row in rows]
+
+
+def parameters_line(plan: QueryPlan) -> str:
+    """One-line description of a plan's parameters, for display next to
+    the metric name (PRD section 9 auditability). Mirrors the shipped
+    renderer's wording using only public QueryPlan fields; display
+    formatting only, no values."""
+    parts = []
+    for f in plan.filters:
+        vals = ",".join(f.values) if f.values else f.operator
+        parts.append(f"{short(f.member)} {f.operator} {vals}")
+    td = plan.time_dimension
+    if td is not None and td.date_range:
+        parts.append(f"period {td.date_range[0]}..{td.date_range[1]}")
+        if td.granularity:
+            parts.append(f"by {td.granularity}")
+    if plan.dimensions:
+        parts.append("grouped by " + ", ".join(short(d) for d in plan.dimensions))
+    return "; ".join(parts) if parts else "no filters (all BAs, full window)"
+
+
+def caveat_notes(plan: QueryPlan, rows: list[dict]) -> list[str]:
+    """The standing catalog caveats a queried slice warrants. Same
+    conditions as the shipped renderer, built on the public caveat text
+    and series-break constants from nl.catalog."""
+    notes = []
+    td = plan.time_dimension
+    spans_break = (
+        td is not None
+        and td.date_range is not None
+        and td.date_range[0] <= SERIES_BREAK_DATE <= td.date_range[1]
+    )
+    if plan.view == "generation_mix" and (spans_break or td is None or td.date_range is None):
+        notes.append(CAVEATS["series_break"])
+    if plan.view == "demand" and not any(
+        f.member.endswith(".is_imputed") for f in plan.filters
+    ):
+        notes.append(CAVEATS["imputation_mix"])
+    if plan.view == "demand_growth":
+        notes.append(CAVEATS["growth_complete_years"])
+    has_nulls = any(v is None for row in rows for v in row.values())
+    if plan.view == "generation_mix" and has_nulls:
+        notes.append(CAVEATS["mix_nulls"])
+    return notes

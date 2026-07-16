@@ -22,6 +22,7 @@ from eval.golden import GoldenEntry
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
 POLL_SECONDS = 15
+MAX_WAIT_SECONDS = 30 * 60
 
 
 def submit_batch(
@@ -42,7 +43,12 @@ def submit_batch(
 
 
 def wait_for_batch(batch_id: str, client: anthropic.Anthropic) -> None:
-    """Poll until the batch has ended, printing progress."""
+    """Poll until the batch has ended, printing progress.
+
+    Gives up after MAX_WAIT_SECONDS: the batch keeps processing server-side
+    and nothing is lost, so a stuck poll should hand control back rather
+    than block the terminal indefinitely."""
+    deadline = time.monotonic() + MAX_WAIT_SECONDS
     while True:
         batch = client.messages.batches.retrieve(batch_id)
         counts = batch.request_counts
@@ -53,6 +59,15 @@ def wait_for_batch(batch_id: str, client: anthropic.Anthropic) -> None:
         )
         if batch.processing_status == "ended":
             return
+        if time.monotonic() >= deadline:
+            raise SystemExit(
+                f"batch {batch_id} still {batch.processing_status} after "
+                f"{MAX_WAIT_SECONDS // 60} minutes of polling. It keeps "
+                "processing server-side and nothing is lost. Resume with\n"
+                f"  uv run python -m eval run --resume {batch_id}\n"
+                "and once the raw results are collected, re-score for free with\n"
+                f"  make eval-score RAW=eval/results/raw_{batch_id}.jsonl"
+            )
         time.sleep(POLL_SECONDS)
 
 

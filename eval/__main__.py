@@ -2,6 +2,7 @@
 
   uv run python -m eval pin                    # pin expected rows (Cube running)
   uv run python -m eval run                    # full batch run -> artifact + report
+  uv run python -m eval run --resume <id>      # collect + score an already submitted batch
   uv run python -m eval score --raw <file>     # re-score a saved raw batch (no API cost)
   uv run python -m eval report                 # regenerate docs/eval_report.md from latest.json
 
@@ -22,7 +23,7 @@ from nl.interface import resolve_outcome
 from nl.planner import MODEL, parse_planner_text
 
 from eval.artifact import LATEST_PATH, build_artifact, write_artifact
-from eval.batch import load_raw_results, run_batch
+from eval.batch import collect_batch, load_raw_results, run_batch, wait_for_batch
 from eval.golden import GOLDEN_SET_PATH, load_golden_set, validate_golden_plans
 from eval.pin import GOLDEN_RESULTS_PATH, load_pinned_results, pin_golden_results
 from eval.score import score_question
@@ -102,12 +103,19 @@ def cmd_pin(_args) -> int:
     return 0
 
 
-def cmd_run(_args) -> int:
+def cmd_run(args) -> int:
     views = governed_views(fetch_meta())
     entries = _load_and_validate(views)
     system_prompt = build_system_prompt(views)
     client = anthropic.Anthropic()
-    batch_id, raw_path = run_batch(entries, system_prompt, client)
+    if args.resume:
+        # Batch already submitted (e.g. a previous run hit the poll cap):
+        # wait for it and collect, but never resubmit.
+        batch_id = args.resume
+        wait_for_batch(batch_id, client)
+        raw_path = collect_batch(batch_id, client)
+    else:
+        batch_id, raw_path = run_batch(entries, system_prompt, client)
     print(f"raw results: {raw_path}")
     results = _score_raw(entries, load_raw_results(raw_path), views)
     _write_outputs(results, batch_id=batch_id, system_prompt=system_prompt)
@@ -141,7 +149,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(prog="eval", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("pin").set_defaults(func=cmd_pin)
-    sub.add_parser("run").set_defaults(func=cmd_run)
+    run = sub.add_parser("run")
+    run.add_argument(
+        "--resume",
+        metavar="BATCH_ID",
+        help="collect and score an already submitted batch instead of submitting a new one",
+    )
+    run.set_defaults(func=cmd_run)
     score = sub.add_parser("score")
     score.add_argument("--raw", required=True, help="path to a saved raw_<batch_id>.jsonl")
     score.set_defaults(func=cmd_score)

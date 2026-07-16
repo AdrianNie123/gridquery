@@ -12,10 +12,11 @@ from app.governed import (
     BA_CODES,
     CUBE_SETUP_HINT,
     cached_views,
+    caveat_notes,
     run_governed_plan,
     short,
 )
-from nl.catalog import CAVEATS, DATA_WINDOW_END, SERIES_BREAK_DATE
+from nl.catalog import DATA_WINDOW_END
 from nl.schema import Filter, QueryPlan, TimeDimension
 
 ROLLUP_SHARES = [
@@ -114,10 +115,8 @@ st.dataframe(
     hide_index=True,
 )
 
-if any(row.get(m) is None for m in FUEL_SHARES):
-    st.caption(f"Note: {CAVEATS['mix_nulls']}")
-if date_range[0] <= SERIES_BREAK_DATE <= date_range[1]:
-    st.caption(f"Note: {CAVEATS['series_break']}")
+for note in caveat_notes(plan, rows):
+    st.caption(f"Note: {note}")
 
 with st.expander("Query plan (governed, validator-checked at load)"):
     st.json(plan.model_dump(exclude_none=True))

@@ -11,8 +11,14 @@ import anthropic
 import requests
 import streamlit as st
 
-from app.governed import CUBE_SETUP_HINT, cached_views, humanize_rows, refresh_views
-from nl.answer import _caveats, _parameters_line
+from app.governed import (
+    CUBE_SETUP_HINT,
+    cached_views,
+    caveat_notes,
+    humanize_rows,
+    parameters_line,
+    refresh_views,
+)
 from nl.executor import CubeQueryError
 from nl.interface import ask
 
@@ -32,14 +38,12 @@ def cached_client() -> anthropic.Anthropic:
 
 def render_answer_kind(answer) -> None:
     st.subheader(f"Metric: {answer.metric}")
-    # Reuse the shipped renderer's formatting helpers so the parameters
-    # line and caveat selection stay identical to the CLI path.
-    st.markdown(f"**Parameters:** {_parameters_line(answer.plan)}")
+    st.markdown(f"**Parameters:** {parameters_line(answer.plan)}")
     if answer.rows:
         st.dataframe(humanize_rows(answer.rows), width="stretch")
     else:
         st.info("No rows returned for this slice.")
-    for note in _caveats(answer.plan, answer.rows or []):
+    for note in caveat_notes(answer.plan, answer.rows or []):
         st.caption(f"Note: {note}")
     with st.expander("Query plan and usage"):
         st.json(answer.plan.model_dump(exclude_none=True))
@@ -80,15 +84,19 @@ except requests.exceptions.RequestException:
     st.error(CUBE_SETUP_HINT)
     st.stop()
 
-# key= binds the input to session_state, so the text stays populated after
-# a clarification and the user can refine and re-ask (single-shot loop).
-question = st.text_input(
-    "Your question",
-    key="question",
-    placeholder="Which balancing authority had the highest total demand in 2023?",
-)
+# The form makes the API call happen only on explicit submit, never on an
+# incidental rerun. key= binds the input to session_state, so the text stays
+# populated after a clarification and the user can refine and re-ask
+# (single-shot loop).
+with st.form("nl_question"):
+    question = st.text_input(
+        "Your question",
+        key="question",
+        placeholder="Which balancing authority had the highest total demand in 2023?",
+    )
+    submitted = st.form_submit_button("Run query")
 
-if question:
+if submitted and question:
     try:
         with st.spinner("Planning and querying the governed layer..."):
             answer = ask(question, views=views, client=cached_client())

@@ -35,8 +35,9 @@ make app       # streamlit run app/Home.py, needs ANTHROPIC_API_KEY in .env
   `nl.validator.validate_plan` at page load and run through
   `nl.executor.execute_plan`. No SQL and no DuckDB anywhere in `app/`.
 - The app never modifies anything under `nl/`, `eval/`, `semantic/`, or
-  `transform/` (frozen contract). It reuses the shipped renderer's
-  formatting helpers so the UI matches the CLI path.
+  `transform/` (frozen contract). Display formatting (parameters line,
+  caveat selection) lives in `app/governed.py` as public helpers that
+  mirror the shipped renderer using only the public contract surface.
 - Cube down or a missing API key produces setup instructions, never a
   stack trace and never fake data.
 

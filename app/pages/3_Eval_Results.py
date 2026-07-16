@@ -6,11 +6,19 @@ and shows nothing else: no placeholder metrics.
 """
 
 import json
+import os
 from pathlib import Path
 
 import streamlit as st
 
-ARTIFACT_PATH = Path(__file__).resolve().parents[2] / "eval" / "results" / "latest.json"
+# Env override exists for the offline smoke tests; the default is the
+# frozen artifact path from the Phase 5 contract.
+ARTIFACT_PATH = Path(
+    os.environ.get(
+        "GRIDQUERY_EVAL_ARTIFACT",
+        Path(__file__).resolve().parents[2] / "eval" / "results" / "latest.json",
+    )
+)
 
 st.set_page_config(page_title="Eval results", page_icon="⚡")
 st.title("Eval results")
